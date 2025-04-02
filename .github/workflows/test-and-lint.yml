@@ -1,12 +1,12 @@
 name: Test and Lint
 
-on: 
+on:
   pull_request:
-    branches: 
+    branches:
       - dev
       - main
 
-jobs: 
+jobs:
   test-and-lint:
     runs-on: ubuntu-latest
 
@@ -23,11 +23,17 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install flake8 pytest
-          
+          pip install flake8 pytest black isort
+
+      - name: Run black formatting
+        run: black --check . # Check if code is formatted correctly
+
+      - name: Run isort
+        run: isort --check-only . # Check if imports are sorted correctly
+
       - name: Run flake8 linting
         run: flake8 . #Kör linting och returnerar fel om kodstilen inte följs
 
       - name: Run pytest
         run: pytest #Kör alla testfiler som börjar med "test_"
-        
+
