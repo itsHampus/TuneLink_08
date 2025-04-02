@@ -1,6 +1,6 @@
-vevnv/
+.venv/
 __pycache__/
-.env
+.env/
 
 # Python-relaterade filer
 *.pyc
