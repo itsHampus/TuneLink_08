@@ -26,10 +26,10 @@ jobs:
           pip install flake8 pytest black isort
 
       - name: Run black formatting
-        run: -m black --check . # Check if code is formatted correctly
+        run: black --check . # Check if code is formatted correctly
 
       - name: Run isort
-        run: -m isort --check-only . # Check if imports are sorted correctly
+        run: isort --check-only . # Check if imports are sorted correctly
 
       - name: Run flake8 linting
         run: flake8 . #Kör linting och returnerar fel om kodstilen inte följs
