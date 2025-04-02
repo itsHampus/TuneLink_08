@@ -1,0 +1,50 @@
+{% extends 'indexbase.html' %}
+
+{% block content %}
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico">
+
+    <title>TuneLink</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/sign-in/">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+  </head>
+
+  <body class="text-center">
+    <div class="container mt-5">
+        {% if error %}
+        <div class="alert alert-danger">
+            <ul>
+                <li>{{ error }}</li>
+            </ul>
+        </div>
+        {% endif %}
+
+        <img src="{{ url_for('static', filename='tunelink_logo.svg') }}" alt="TuneLink Logo" width="200">
+        <div class="d-flex justify-content-center mt-4">
+          <a href="{{ auth_url }}" class="btn btn-dark d-flex align-items-center px-3 py-2">
+            Logga in med
+            <img src="{{ url_for('static', filename='spotify-icon.png') }}" alt="Spotify logo" class="spotify-icon ml-2">
+          </a>
+        </div>
+
+
+
+
+        <p class="mt-5 mb-3 text-muted">&copy; Av Alexander , Hampus , Louisian, Kevin</p>
+
+
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  </body>
+</html>
+{% endblock %}

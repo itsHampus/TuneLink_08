@@ -1,0 +1,73 @@
+{% extends 'base.html' %} {% block content %}
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico" />
+
+  <title>TuneLink</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+  <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/sign-in/" />
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet" />
+</head>
+<div class="container mt-5 text-center">
+
+  <div class="profil_card card" >
+
+    {% if user.images %}
+    <img src="{{ user.images[0].url }}" alt="Profile Image" class="profilepicture mb-3" />
+  {% endif %}
+
+    <div class="profil_card card-body">
+      <h5 class="card-title">{{ user.display_name }}</h5>
+      <p class="card-text">
+        Jag kastar stenar i mitt glashus, Jag kastar pil i min kuvös, Och så odlar jag min rädsla, Ja, jag sår ständigt nya frön
+      </p>
+      <a href="#" class="btn btn-success">Redigera</a>
+    </div>
+  </div>
+
+
+
+  <hr class="my-4" />
+
+  <h4>Genrer du lyssnar på</h4>
+  <div class="d-flex justify-content-center flex-wrap mb-4">
+    {% for genre in genres %}
+    <span class="badge badge-secondary m-2 px-3 py-2">{{ genre }}</span>
+    {% endfor %}
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <h4>Dina topp 5 låtar</h4>
+      <ol class="list-group list-group-numbered mb-4">
+        {% for track in top_tracks %}
+        <li class="list-group-item d-flex justify-content-between align-items-start">
+          <div class="ms-2 me-auto">
+            <div class="fw-bold">{{ track.name }}</div>
+            {{ track.artist }}
+          </div>
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+
+    <div class="col-md-6">
+      <h4>Dina topp 5 artister</h4>
+      <ol class="list-group list-group-numbered mb-4">
+        {% for artist in top_artists %}
+        <li class="list-group-item d-flex justify-content-between align-items-start">
+          <div class="ms-2 me-auto">
+            <div class="fw-bold">{{ artist.name }}</div>
+          </div>
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+
+
+{% endblock %}
