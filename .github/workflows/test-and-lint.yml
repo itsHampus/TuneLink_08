@@ -23,7 +23,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install flake8 pytest
+          pip install flake8 pytest black isort
 
       - name: Run black formatting
         run: black --check . # Check if code is formatted correctly
