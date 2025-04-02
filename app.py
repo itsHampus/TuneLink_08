@@ -55,8 +55,7 @@ def profile():
 
     user = sp.current_user()
 
-    top_tracks_raw = sp.current_user_top_tracks(limit=5,
-    time_range="short_term")[
+    top_tracks_raw = sp.current_user_top_tracks(limit=5, time_range="short_term")[
         "items"
     ]
     top_tracks = [
