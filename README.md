@@ -41,7 +41,7 @@ To get started with TuneLink, follow the setup instructions below to run the app
     - SPOTIPY_CLIENT_ID=contact_nutvendor_on_discord 
     - SPOTIPY_CLIENT_SECRET=contact_nutvendor_on_discord
     - SPOTIPY_REDIRECT_URI=http://127.0.0.1:5000/callback
-    - SPOTIPY_SCOPE=user-top-read
+    - SPOTIPY_SCOPE=user-top-read  
 Contact `nutvendor` on discord for Spotify keys, also send your name and email (linked to Spotify) to be added as a user. You must be a registered user to use the API and therefore also the app. 
 5. **Run the Application**:
     ```bash
