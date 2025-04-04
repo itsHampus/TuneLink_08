@@ -30,9 +30,11 @@ To get started with TuneLink, follow the setup instructions below to run the app
    git clone https://github.com/<your-username>/TuneLink_08.git
    cd TuneLink_08
 2. **Set up a Virtual Environment:**
+    ```bash
     python3 -m venv .venv
     source .venv/bin/activate
 3. **Install Dependencies:**
+    ```bash
     pip install -r requirements.txt
 4. **Set up Environment Variables:** Create a `.env` file in the root directory and add the following:
     - FLASK_SECRET=your_flask_secret_key 
@@ -42,6 +44,7 @@ To get started with TuneLink, follow the setup instructions below to run the app
     - SPOTIPY_SCOPE=user-top-read
 Contact `nutvendor` on discord for Spotify keys, also send your name and email (linked to Spotify) to be added as a user. You must be a registered user to use the API and therefore also the app. 
 5. **Run the Application**:
+    ```bash
     flask run
 
 6. **Access the Application:** Open your browser and navigate to `http://127.0.0.1:5000`
@@ -54,8 +57,10 @@ Contact `nutvendor` on discord for Spotify keys, also send your name and email (
 ## Development Workflow
 The project follows the **Gitflow** workflow:
 1. Create a feature branch from `dev`: 
+    ```bash
     git checkout -b feature/your-feature-name
 2. Commit and push changes reguearly:
+    ```bash
     git add .
     git commit -m "Add feature: your-feature-name"
     git push origin feature/your-feature-name
