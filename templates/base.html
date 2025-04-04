@@ -57,7 +57,7 @@
           <div class="d-flex align-items-center">
             <img src="{{ user.images[0].url }}" alt="Profile Image" class="small-profile" alt="Profile">
             <div class="ms-3 profile-info">
-              <h6 class="text-white mb-0">{{ user.display_name }}</h6>
+              <h6 class="text-white mb-0">{{ user.display_name }}<a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm">Logga ut</a></h6>
             </div>
           </div>
         </div>
