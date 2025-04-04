@@ -11,13 +11,22 @@
 
 ## Getting Started
 
-1. Fork the repository to your Github
-2. Clone your forked repository:
+1. **Fork the repository to your Github**
+2. **Clone your forked repository**:
     git clone https://github.com/<your-username>/TuneLink_08.git
-3. Set up the virtual environment:
+3. **Set up the virtual environment**:
     python3 -m venv .venv
     source .venv/bin/activate
-4. Install dependecies:
+4. **Install Dependencies:**
+    pip install -r requirements.txt
+5. **Set up Environment Variables**: Create a `.env` file in the root directory and add the following:
+    - FLASK_SECRET=your_flask_secret_key 
+    - SPOTIPY_CLIENT_ID=contact_nutvendor_on_discord 
+    - SPOTIPY_CLIENT_SECRET=contact_nutvendor_on_discord
+    - SPOTIPY_REDIRECT_URI=http://127.0.0.1:5000/callback
+    - SPOTIPY_SCOPE=user-top-read
+Contact `nutvendor` on discord for Spotify keys, also send your name and email (linked to Spotify) to be added as a user. You must be a registered user to use the API and therefore also the app. 
+6. **Install dependecies**:
     pip install -r requirements.txt
 
 
