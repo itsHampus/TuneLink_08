@@ -3,8 +3,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, redirect, render_template, request, session, url_for
 from spotipy import Spotify
-from spotipy.cache_handler import FlaskSessionCacheHandler
-from spotipy.cache_handler import CacheFileHandler
+from spotipy.cache_handler import CacheFileHandler, FlaskSessionCacheHandler
 from spotipy.oauth2 import SpotifyOAuth
 
 load_dotenv()
@@ -27,7 +26,6 @@ def index():
     )
     auth_url = auth_manager.get_authorize_url()
     return render_template("index.html", auth_url=auth_url)
-    return render_template("index.html")
 
 
 @app.route("/callback")
@@ -91,7 +89,7 @@ def logout():
     if os.path.exists(".cache"):
         os.remove(".cache")
     session.clear()
-    return redirect(url_for('index'))
+    return redirect(url_for("index"))
 
 
 if __name__ == "__main__":
