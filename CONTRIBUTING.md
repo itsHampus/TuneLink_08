@@ -63,10 +63,16 @@ The project uses a **peer review process** to ensure code quality. All pull requ
 - Include clear and descriptive commit messages.
 
 ## Coding Standards
-1. Follow [PEP 8](https://peps.python.org/pep-0008/) for Python code style.
+1. Follow [PEP 8](https://peps.python.org/pep-0008/) for Python code style. 
+- Use flake8 to check for code style violations:
+    flake8 .
+- Use black for automatic code formatting across the project:
+    black .
 2. Use type annotations where applicable.
-3. Write meaningful docstrings for all functions and classes.
-4. Organize imports using `isort`.
+3. Write meaningful docstrings for all functions and classes using the **Google style** or **PEP 257**
+4. Organize imports using `isort`:
+    isort .
+
 
 
 ## Testing 
