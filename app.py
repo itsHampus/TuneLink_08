@@ -5,6 +5,8 @@ from flask import Flask, redirect, render_template, request, session, url_for
 from spotipy import Spotify
 from spotipy.cache_handler import CacheFileHandler, FlaskSessionCacheHandler
 from spotipy.oauth2 import SpotifyOAuth
+from db import get_connection
+
 
 load_dotenv()
 
@@ -41,6 +43,33 @@ def callback():
     code = request.args.get("code")
     token_info = auth_manager.get_access_token(code)
     session["token_info"] = token_info
+
+    sp = Spotify(auth=token_info["access_token"])
+    profile = sp.current_user()
+
+    spotify_id = profile["id"]
+    display_name = profile["display_name"] or "Anonym"
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        "SELECT id FROM users WHERE spotify_id = %s", (spotify_id,))
+    user = cur.fetchone()
+
+    if not user:
+        cur.execute(
+            "INSERT INTO users(spotify_id, username) VALUES (%s,%s) RETURNING id;",
+            (spotify_id, display_name)
+        )
+        user_id = cur.fetchone()[0]
+        conn.commit()
+    else:
+        user_id = user[0]
+
+    cur.close()
+    conn.close()
+    session["user_id"] = user_id
     return redirect(url_for("profile"))
 
 
