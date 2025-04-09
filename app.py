@@ -111,6 +111,14 @@ def profile():
         genres=top_genres,
     )
 
+@app.route("/subforum")
+def subforum():
+    user = None
+    if "token_info" in session:
+        access_token = session["token_info"]["access_token"]
+        sp = Spotify(auth=access_token)
+        user = sp.current_user()
+    return render_template("subforum.html", user=user)
 
 @app.route("/logout")
 def logout():
