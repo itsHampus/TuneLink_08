@@ -38,3 +38,4 @@ coverage/
 htmlcov/
 nosetests.xml
 
+db.py

@@ -16,6 +16,8 @@
     border-radius: 50%;
     border: 3px solid black;
     object-fit: cover;
+    margin-left: 68px;
+    margin-top: 10px;
 }
 .custom-navbar {
     height: 60px;
