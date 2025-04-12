@@ -16,8 +16,10 @@
 
   <div class="profil_card card" >
 
-    {% if user.images %}
-    <img src="{{ user.images[0].url }}" alt="Profile Image" class="profilepicture mb-3" />
+     {% if user.images and user.images|length > 0 %}
+  <img src="{{ user.images[0].url }}" alt="Profile Image" class="profilepicture mb-3" />
+  {% else %}
+  <img src="{{ url_for('static', filename='default_profile.png') }}" alt="Default Profile Image" class="profilepicture mb-3" />
   {% endif %}
 
     <div class="profil_card card-body">
@@ -68,6 +70,24 @@
       </ol>
     </div>
   </div>
+
+   <h4>Skriv ett inlägg</h4>
+  <form action="{{ url_for('create_post') }}" method="POST">
+    <div class="mb-3">
+      <textarea class="form-control" name="content" rows="3" placeholder="Vad vill du dela?"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Publicera</button>
+  </form>
+
+    <hr class="my-4">
+<h4>Senaste inlägg</h4>
+<ul class="list-group">
+  {% for post in posts %}
+  <li class="list-group-item">
+    <strong>{{ post.username }}</strong>: {{ post.content }}
+  </li>
+  {% endfor %}
+</ul>
 
 
 {% endblock %}
