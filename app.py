@@ -5,6 +5,9 @@ from flask import Flask, redirect, render_template, request, session, url_for
 from spotipy import Spotify
 from spotipy.cache_handler import CacheFileHandler, FlaskSessionCacheHandler
 from spotipy.oauth2 import SpotifyOAuth
+from spotipy import Spotify
+
+import db
 
 load_dotenv()
 
@@ -13,6 +16,32 @@ app.secret_key = os.getenv("FLASK_SECRET")
 
 scope = os.getenv("SPOTIPY_SCOPE")
 
+@app.context_processor
+def inject_user():
+    user = None
+    user_image = url_for('static', filename='default_profile.png')
+
+    token_info = session.get("token_info")
+    if token_info:
+        try:
+            sp = Spotify(auth=token_info["access_token"])
+            user = sp.current_user()
+            if user and user.get("images"):
+                user_image = user["images"][0]["url"]
+        except:
+            pass
+
+    return dict(user=user, user_image=user_image)
+
+def get_all_posts():
+    conn = db.get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id, username, content FROM posts ORDER BY id DESC LIMIT 10")
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    posts = [{"id": row[0], "username": row[1], "content": row[2]} for row in rows]
+    return posts
 
 @app.route("/")
 def index():
