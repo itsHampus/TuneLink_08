@@ -1,0 +1,26 @@
+{% extends 'indexbase.html' %}
+{% block content %}
+<h2 class="mb-4">Skapa ett inlägg</h2>
+<form method="POST">
+  <input class="form-control mb-2" name="username" placeholder="Ditt namn" required />
+  <textarea class="form-control mb-2" name="content" placeholder="Vad vill du dela?" required></textarea>
+  <button class="btn btn-primary">Publicera inlägg</button>
+</form>
+
+<hr />
+<h3>Inlägg</h3>
+{% for post in posts %}
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5 class="card-title">{{ post.username }} skrev:</h5>
+      <p class="card-text">{{ post.content }}</p>
+
+      <a href="{{ url_for('post_detail', post_id=post.id) }}" class="btn btn-outline-primary">
+        Visa kommentarer
+      </a>
+      
+    </div>
+  </div>
+{% endfor %}
+{% endblock %}
+

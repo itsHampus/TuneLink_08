@@ -1,0 +1,23 @@
+{% extends 'indexbase.html' %}
+{% block content %}
+<h3>{{ post.username }} skrev:</h3>
+<p>{{ post.content }}</p>
+
+<hr />
+<h4>Lägg till kommentar</h4>
+<form method="POST">
+  <input class="form-control mb-2" name="username" placeholder="Ditt namn" required />
+  <textarea class="form-control mb-2" name="content" placeholder="Skriv en kommentar..." required></textarea>
+  <button class="btn btn-secondary">Kommentera</button>
+</form>
+
+<hr />
+<h5>Kommentarer</h5>
+{% for comment in comments %}
+  <div class="mb-3 border p-2">
+    <strong>{{ comment.username }}</strong><br />
+    {{ comment.content }}
+  </div>
+{% endfor %}
+<a href="{{ url_for('posts') }}" class="btn btn-link">Tillbaka till inlägg</a>
+{% endblock %}

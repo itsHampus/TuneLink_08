@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+  <h3>Inlägg av {{ post.username }}</h3>
+  <p>{{ post.content }}</p>
+
+  <hr>
+
+  <h4>Kommentarer</h4>
+  {% if comments %}
+    <ul class="list-group mb-4">
+      {% for comment in comments %}
+        <li class="list-group-item">
+          <strong>{{ comment.username }}</strong>: {{ comment.content }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Inga kommentarer ännu.</p>
+  {% endif %}
+
+  <h5>Lämna en kommentar</h5>
+  <form method="POST">
+    <input type="hidden" name="username" value="{{ user.display_name }}">
+    <div class="form-group">
+      <textarea name="content" class="form-control" rows="3" placeholder="Skriv din kommentar här..." required></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary mt-2">Kommentera</button>
+  </form>
+
+</div>
+{% endblock %}
