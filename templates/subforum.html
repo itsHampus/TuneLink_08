@@ -1,5 +1,5 @@
 {% extends 'base.html' %} {% block content %}
-<h1 class="text-center">Test Kent </h1>
+<h1 class="text-center">{{ forum.name }}</h1>
 <div class="text-center my-4">
     <button type="button" class="btn btn-secondary btn-lg" data-bs-toggle="modal" data-bs-target="#start_thread_modal">
         <i class="bi bi-plus-lg me-2"></i>
@@ -7,7 +7,7 @@
       </button>
 
 
-
+{% for thread in threads %}
 <div class="center_wrapper">
 <div class="thread_card card">
     <p class="card-text"><small class="text-muted">Här är användaren som lagt upp</small></p>
@@ -36,6 +36,19 @@
     </div>
   </div>
 </div>
+{% endfor %}
+</div>
+
+<div class="col-md-4">
+    <div class="card bg-light shadow-sm">
+        <div class="card-header">
+            <strong>Beskrivning och regler</strong>
+        </div>
+        <div class="card-body">
+            <p class="card-text text-center">{{ forum.description }}</p>
+        </div>
+        </div>
+    </div>
 </div>
 
 <div class="modal fade" id="start_thread_modal" tabindex="-1" aria-labelledby="start_thread_modal_label" aria-hidden="true">

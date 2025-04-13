@@ -5,7 +5,7 @@ from flask import Flask, redirect, render_template, request, session, url_for
 from spotipy import Spotify
 from spotipy.cache_handler import CacheFileHandler, FlaskSessionCacheHandler
 from spotipy.oauth2 import SpotifyOAuth
-from db import get_connection
+from db import get_connection, get_forum_by_name, get_threads_by_forum
 
 
 load_dotenv()
@@ -111,14 +111,45 @@ def profile():
         genres=top_genres,
     )
 
-@app.route("/subforum")
-def subforum():
-    user = None
-    if "token_info" in session:
-        access_token = session["token_info"]["access_token"]
-        sp = Spotify(auth=access_token)
-        user = sp.current_user()
-    return render_template("subforum.html", user=user)
+@app.route("/create_subforum", methods = ["POST"])
+def create_subforum():
+    print(request.form)
+    name = request.form.get("name")
+    description = request.form.get("thread_description")
+    creator_id = session.get("user_id")
+
+    if not creator_id:
+        return redirect(url_for("index"))
+
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO forums(name, description, creator_id) VALUES (%s, %s, %s)",
+        (name, description, creator_id),
+    )
+
+    conn.commit()
+    cur.close()
+    conn.close()
+    return redirect(url_for("show_subforum", name = name))
+
+
+
+
+@app.route("/subforum/<name>")
+def show_subforum(name):
+    forum = get_forum_by_name(name)
+    if forum is None:
+        return redirect(url_for("index"))
+    threads = get_threads_by_forum(forum_id=forum["id"])
+    token_info = session.get("token_info")
+    if not token_info:
+        return redirect(url_for("index"))
+    sp = Spotify(auth=token_info["access_token"])
+    user = sp.current_user()
+
+    user = sp.current_user()
+    return render_template("subforum.html",name = name, forum = forum, threads = threads, user = user)
 
 @app.route("/logout")
 def logout():
