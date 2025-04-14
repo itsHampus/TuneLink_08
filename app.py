@@ -210,6 +210,29 @@ def logout():
     session.clear()
     return redirect(url_for("index"))
 
+@app.route("/delete_post/<int:post_id>", methods=["POST"])
+def delete_post(post_id):
+    token_info = session.get("token_info")
+    if not token_info:
+        return redirect(url_for("index"))
+
+    sp = Spotify(auth=token_info["access_token"])
+    user = sp.current_user()
+
+    if user["display_name"] not in ["admin", "moderator"]:
+        flash("Du har inte behörighet att ta bort inlägg.")
+        return redirect(url_for("profile"))
+
+    conn = db.get_connection()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM posts WHERE id = %s", (post_id,))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    flash("Inlägget har tagits bort.")
+    return redirect(url_for("profile"))
+
 
 if __name__ == "__main__":
     app.run(debug=True)
