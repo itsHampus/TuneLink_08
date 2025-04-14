@@ -103,17 +103,30 @@ def profile():
         genre_list.extend(artists["genres"])
     top_genres = sorted(set(genre_list))[:5]
 
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT bio, spotify_url FROM users WHERE id = %s", (session["user_id"],))
+    results = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    bio = results [0] if results else ""
+
+    song = results [1] if results else ""
+
+
     return render_template(
         "profile.html",
         user=user,
         top_tracks=top_tracks,
         top_artists=top_artists,
         genres=top_genres,
+        bio=bio,
+        spotify_url=song,
     )
 
 @app.route("/create_subforum", methods = ["POST"])
 def create_subforum():
-    print(request.form)
     name = request.form.get("name")
     description = request.form.get("thread_description")
     creator_id = session.get("user_id")
@@ -134,7 +147,27 @@ def create_subforum():
     return redirect(url_for("show_subforum", name = name))
 
 
+@app.route("/create_bio", methods = ["POST"])
+def create_bio():
+    bio = request.form.get("bio")
+    song = request.form.get("song")
+    creator_id = session.get("user_id")
 
+
+    if not creator_id:
+        return redirect(url_for("index"))
+
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "UPDATE users SET bio = %s, spotify_url = %s WHERE id = %s",
+        (bio, song,creator_id),
+    )
+
+    conn.commit()
+    cur.close()
+    conn.close()
+    return redirect(url_for("profile", song = song , bio = bio))
 
 @app.route("/subforum/<name>")
 def show_subforum(name):

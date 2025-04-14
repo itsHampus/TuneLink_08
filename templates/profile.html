@@ -18,9 +18,12 @@
     <div class="profil_card card-body">
       <h5 class="card-title">{{ user.display_name }}</h5>
       <p class="card-text">
-        Jag kastar stenar i mitt glashus, Jag kastar pil i min kuvös, Och så odlar jag min rädsla, Ja, jag sår ständigt nya frön
+        {{ bio or "Här var det tomt!"}}
       </p>
-      <a href="#" class="btn btn-success">Redigera</a>
+      {% if spotify_url %}
+      <a href="{{ spotify_url }}" class="btn btn-primary" target="_blank">Lyssna på Spotify</a>
+      {% endif %}
+      <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#create_bio_modal">Redigera</a>
     </div>
   </div>
 
@@ -64,5 +67,33 @@
     </div>
   </div>
 
+  <div class="modal fade" id="create_bio_modal" tabindex="-1" aria-labelledby="create_bio" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="start_subforum_label">Uppdatera din Bio</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Stäng"></button>
+        </div>
+  <div class="modal-body">
+    <div class="card mb-4">
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('create_bio') }}">
+          <div class="mb-3">
+            <label for="song" class="form-label">Spotify-URL</label>
+            <input type="text" class="form-control" id="song" name="song" placeholder="Lägg till en låt...">
+          </div>
+          <div class="mb-3">
+            <label for="bio" class="form-label">Beskrivning</label>
+            <textarea class="form-control" id="bio" rows="3" name="bio"placeholder="Beskrivning..."></textarea>
+          </div>
+          <div class="d-flex justify-content-end gap-2">
+            <button type="submit" class="btn btn-primary">Spara Bio</button>
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Avbryt</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
 {% endblock %}
