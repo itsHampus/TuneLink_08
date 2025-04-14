@@ -79,6 +79,12 @@
     <button type="submit" class="btn btn-primary">Publicera</button>
   </form>
 
+    {% if user.display_name in ["admin", "moderator"] %}
+<form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST" style="display:inline;">
+    <button type="submit" class="btn btn-danger btn-sm">🗑 Ta bort</button>
+</form>
+{% endif %}
+
   <hr class="my-4">
 <h4>Senaste inlägg</h4>
 <ul class="list-group">
