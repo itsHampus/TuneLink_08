@@ -112,7 +112,7 @@ def profile():
 
     bio = results [0] if results else ""
 
-    song = results [1] if results else ""
+    spotify_url = results [1] if results else ""
 
 
     return render_template(
@@ -121,12 +121,13 @@ def profile():
         top_tracks=top_tracks,
         top_artists=top_artists,
         genres=top_genres,
-        bio=bio,
-        spotify_url=song,
+        bio = bio,
+        spotify_url = spotify_url,
     )
 
 @app.route("/create_subforum", methods = ["POST"])
 def create_subforum():
+    print(request.form)
     name = request.form.get("name")
     description = request.form.get("thread_description")
     creator_id = session.get("user_id")
