@@ -82,6 +82,8 @@ def profile():
 
     user = sp.current_user()
 
+    user_image = user["images"][0]["url"] if user.get("images") else url_for("static", filename="default_profile.png")
+
     top_tracks_raw = sp.current_user_top_tracks(limit=5, time_range="short_term")[
         "items"
     ]
@@ -118,6 +120,7 @@ def profile():
     return render_template(
         "profile.html",
         user=user,
+        user_image=user_image,
         top_tracks=top_tracks,
         top_artists=top_artists,
         genres=top_genres,
