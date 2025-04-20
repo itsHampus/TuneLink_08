@@ -1,4 +1,5 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %}
+ {% block content %}
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
@@ -9,16 +10,15 @@
 </head>
 <div class="container mt-5 text-center">
 
-  <div class="profil_card card" >
-
+  <div class="profil_card card">
     {% if user.images %}
     <img src="{{ user.images[0].url }}" alt="Profile Image" class="profilepicture mb-3" />
-  {% endif %}
+    {% endif %}
 
     <div class="profil_card card-body">
       <h5 class="card-title">{{ user.display_name }}</h5>
       <p class="card-text">
-        {{ bio or "Här var det tomt!"}}
+        {{ bio or "Här var det tomt!" }}
       </p>
       {% if spotify_url %}
       <a href="{{ spotify_url }}" class="btn btn-success" target="_blank">Lyssna på Spotify</a>
@@ -26,8 +26,6 @@
       <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#create_bio_modal">Redigera</a>
     </div>
   </div>
-
-
 
   <hr class="my-4" />
 
@@ -67,33 +65,82 @@
     </div>
   </div>
 
+  
   <div class="modal fade" id="create_bio_modal" tabindex="-1" aria-labelledby="create_bio" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
 
         <div class="modal-header">
-          <h5 class="modal-title" id="start_subforum_label">Uppdatera din Bio</h5>
+          <h5 class="modal-title" id="create_bio">Uppdatera din Bio</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Stäng"></button>
         </div>
-  <div class="modal-body">
-    <div class="card mb-4">
-      <div class="card-body">
-        <form method="POST" action="{{ url_for('create_bio') }}">
-          <div class="mb-3">
-            <label for="song" class="form-label">Spotify-URL</label>
-            <input type="text" class="form-control" id="song" name="song" placeholder="Lägg till en låt...">
+
+        <div class="modal-body">
+          <div class="card mb-4">
+            <div class="card-body">
+              <form method="POST" action="{{ url_for('create_bio') }}">
+                <div class="mb-3">
+                  <label for="song" class="form-label">Spotify-URL</label>
+                  <input type="text" class="form-control" id="song" name="song" placeholder="Lägg till en låt...">
+                </div>
+                <div class="mb-3">
+                  <label for="bio" class="form-label">Beskrivning</label>
+                  <textarea class="form-control" id="bio" rows="3" name="bio" placeholder="Beskrivning..."></textarea>
+                </div>
+                <div class="d-flex justify-content-end gap-2">
+                  <button type="submit" class="btn btn-primary">Spara Bio</button>
+                  <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Avbryt</button>
+                </div>
+              </form>
+            </div>
           </div>
-          <div class="mb-3">
-            <label for="bio" class="form-label">Beskrivning</label>
-            <textarea class="form-control" id="bio" rows="3" name="bio"placeholder="Beskrivning..."></textarea>
-          </div>
-          <div class="d-flex justify-content-end gap-2">
-            <button type="submit" class="btn btn-primary">Spara Bio</button>
-            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Avbryt</button>
-          </div>
-        </form>
+        </div>
+
       </div>
     </div>
   </div>
 
+  <!-- to start a new thread -->
+  <hr class="my-5" />
+  <h2>Starta en ny tråd</h2>
+  <form method="POST" action="{{ url_for('create_thread') }}" class="text-start mx-auto" style="max-width: 600px;">
+    <div class="mb-3">
+      <label for="forum_id" class="form-label">Välj Subforum</label>
+      <select class="form-select" id="forum_id" name="forum_id" required>
+        <option value="" selected disabled>Välj forum</option>
+        {% for forum in forums %}
+        <option value="{{ forum.id }}">{{ forum.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="title" class="form-label">Titel</label>
+      <input type="text" class="form-control" id="title" name="title" placeholder="Trådens titel..." required>
+    </div>
+    <div class="mb-3">
+      <label for="spotify_url" class="form-label">Spotify URL</label>
+      <input type="text" class="form-control" id="spotify_url" name="spotify_url" placeholder="https://open.spotify.com/track/...">
+    </div>
+    <div class="mb-3">
+      <label for="description" class="form-label">Beskrivning</label>
+      <textarea class="form-control" id="description" name="description" rows="3" placeholder="Skriv något om din tråd..."></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Skapa tråd</button>
+  </form>
+
+<h2>Kommentera en tråd</h2>
+{% for thread in threads %}
+    <div class="thread-box">
+        <h4>{{ thread.title }}</h4>
+        <p>{{ thread.description }}</p>
+        <form action="{{ url_for('comment_from_profile') }}" method="POST">
+            <input type="hidden" name="thread_id" value="{{ thread.id }}">
+            <textarea name="content" placeholder="Skriv en kommentar..." required></textarea><br>
+            <button type="submit">Kommentera</button>
+        </form>
+    </div>
+{% endfor %}
+
+
+</div>
 {% endblock %}
