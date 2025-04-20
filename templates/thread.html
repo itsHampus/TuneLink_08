@@ -1,0 +1,31 @@
+{% extends "indexbase.html" %}
+
+{% block content %}
+<h2>{{ thread.title }}</h2>
+<p><strong>By:</strong> {{ thread.username }}</p>
+<p>{{ thread.description }}</p>
+{% if thread.spotify_url %}
+    <iframe src="{{ thread.spotify_url }}" width="300" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+{% endif %}
+
+<hr>
+
+<h3>Comments</h3>
+{% for comment in comments %}
+    <div>
+        <p><strong>{{ comment.username }}</strong> ({{ comment.created_at }}):</p>
+        <p>{{ comment.description }}</p>
+        {% if comment.spotify_url %}
+            <iframe src="{{ comment.spotify_url }}" width="300" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+        {% endif %}
+        <hr>
+    </div>
+{% endfor %}
+
+<h3>Leave a Comment</h3>
+<form method="post">
+    <textarea name="description" rows="4" cols="50" required></textarea><br>
+    <input type="text" name="spotify_url" placeholder="Spotify URL (optional)"><br>
+    <input type="submit" value="Post Comment">
+</form>
+{% endblock %}
