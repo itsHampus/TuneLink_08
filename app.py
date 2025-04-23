@@ -31,18 +31,16 @@ def profile():
     if not token_info:
         return redirect(url_for("index"))
 
-    user, top_tracks, top_artists, top_genres, bio, spotify_url = get_user_profile(
-        session
-    )
+    user_profile_dict = get_user_profile(token_info["access_token"], session["user_id"])
 
     return render_template(
         "profile.html",
-        user=user,
-        top_tracks=top_tracks,
-        top_artists=top_artists,
-        genres=top_genres,
-        bio=bio,
-        spotify_url=spotify_url,
+        user=user_profile_dict["user"],
+        top_tracks=user_profile_dict["top_tracks"],
+        top_artists=user_profile_dict["top_artists"],
+        genres=user_profile_dict["top_genres"],
+        bio=user_profile_dict["bio"],
+        spotify_url=user_profile_dict["spotify_url"],
     )
 
 
@@ -78,12 +76,38 @@ def create_bio():
 
 @app.route("/subforum/<name>")
 def show_subforum(name):
-    subforum, threads = get_subforum_data(name, session)
-    if not subforum:
-        return render_template("error.html", error="Subforum not found.")
-    user = get_user()
+    subforum_data_dict = get_subforum_data(name)
+    if subforum_data_dict is None:
+        return redirect(url_for("error", error="Subforumet existerar inte."))
+
+    user = get_user(session["token_info"]["access_token"])
+
     return render_template(
-        "subforum.html", name=name, forum=subforum, threads=threads, user=user
+        "subforum.html",
+        name=name,
+        forum=subforum_data_dict["subforum"],
+        threads=subforum_data_dict["threads"],
+        user=user,
+    )
+
+
+@app.route("/error")
+def error():
+    user = get_user(session["token_info"]["access_token"])
+
+    error_message = request.args.get("error")
+    return render_template("error.html", error=error_message, user=user)
+
+
+@app.errorhandler(404)
+def page_not_found():
+    user = get_user(session["token_info"]["access_token"])
+
+    return (
+        render_template(
+            "error.html", error="Sidan du försöker nå, existerar inte.", user=user
+        ),
+        404,
     )
 
 

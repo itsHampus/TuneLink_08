@@ -1,14 +1,13 @@
+from operator import attrgetter
+
 from spotipy import Spotify
 
-from db import get_connection, get_user_profile
+from db import get_user_profile_db
 
 
-def get_user_profile(session):
-    token_info = session.get("token_info")
-    if not token_info:
-        return None
+def get_user_profile(access_token: str, user_id: str):
 
-    sp = Spotify(auth=token_info["access_token"])
+    sp = Spotify(auth=access_token)
 
     user = sp.current_user()
 
@@ -18,9 +17,18 @@ def get_user_profile(session):
 
     top_genres = get_user_top_genres(sp)
 
-    bio, spotify_url = get_user_profile(session)
+    user_profile_db_dict = get_user_profile_db(user_id)
+    bio = user_profile_db_dict["bio"]
+    spotify_url = user_profile_db_dict["spotify_url"]
 
-    return user, top_tracks, top_artists, top_genres, bio, spotify_url
+    return {
+        "user": user,
+        "top_tracks": top_tracks,
+        "top_artists": top_artists,
+        "top_genres": top_genres,
+        "bio": bio,
+        "spotify_url": spotify_url,
+    }
 
 
 def get_user_top_tracks(sp: Spotify):
@@ -71,7 +79,7 @@ def get_user_profile_id_and_display_name(access_token):
     return spotify_id, display_name
 
 
-def get_user(access_token):
+def get_user(access_token: str):
     sp = Spotify(auth=access_token)
     user = sp.current_user()
 

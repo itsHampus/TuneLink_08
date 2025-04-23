@@ -1,5 +1,5 @@
 {% extends 'base.html' %} {% block content %}
-<h1 class="text-center">{{ forum.name }}</h1>
+<h1 class="text-center">{{ forum["name"] }}</h1>
 <div class="text-center my-4">
     <button type="button" class="btn btn-secondary btn-lg" data-bs-toggle="modal" data-bs-target="#start_thread_modal">
         <i class="bi bi-plus-lg me-2"></i>
@@ -45,7 +45,7 @@
             <strong>Beskrivning och regler</strong>
         </div>
         <div class="card-body">
-            <p class="card-text text-center">{{ forum.description }}</p>
+            <p class="card-text text-center">{{ forum["description"] }}</p>
         </div>
         </div>
     </div>

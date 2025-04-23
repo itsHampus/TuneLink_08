@@ -29,7 +29,9 @@ def handle_callback(session):
         cache_handler=FlaskSessionCacheHandler(session),
         show_dialog=True,
     )
+
     code = request.args.get("code")
+
     token_info = auth_manager.get_access_token(code)
     session["token_info"] = token_info
 
