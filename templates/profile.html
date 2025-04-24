@@ -133,6 +133,11 @@
     <div class="thread-box">
         <h4>{{ thread.title }}</h4>
         <p>{{ thread.description }}</p>
+
+        {% if thread.creator_id == session['user_id'] %}
+            <a href="{{ url_for('edit_thread', thread_id=thread.id) }}" class="btn btn-sm btn-warning">Redigera</a>
+        {% endif %}
+
         <form action="{{ url_for('comment_from_profile') }}" method="POST">
             <input type="hidden" name="thread_id" value="{{ thread.id }}">
             <textarea name="content" placeholder="Skriv en kommentar..." required></textarea><br>
