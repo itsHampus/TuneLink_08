@@ -197,6 +197,31 @@ def show_subforum(name):
     )
 
 
+@app.route("/delete_subforum/<name>", methods=["POST"])
+def delete_subforum(name):
+   
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for("index"))
+
+    
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT is_admin FROM users WHERE id = %s", (user_id,))
+    result = cur.fetchone()
+    if not result or not result[0]: 
+        cur.close()
+        conn.close()
+        return redirect(url_for("profile"))
+
+    
+    cur.execute("DELETE FROM forums WHERE name = %s", (name,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return redirect(url_for("profile"))
+
+
 @app.route("/logout")
 def logout():
     cache_handler = CacheFileHandler(cache_path=".cache")
