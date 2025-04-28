@@ -100,7 +100,7 @@ def error():
 
 
 @app.errorhandler(404)
-def page_not_found():
+def page_not_found(err):
     user = get_user(session["token_info"]["access_token"])
 
     return (

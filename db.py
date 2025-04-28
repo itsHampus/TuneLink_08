@@ -4,6 +4,14 @@ import psycopg2
 
 
 def get_connection():
+    """Establishes a connection to the PostgreSQL database.
+
+    Returns
+    -------
+        psycopg2.connect
+            A connection object to the PostgreSQL database.
+
+    """
     return psycopg2.connect(
         dbname=os.getenv("DB_NAME"),
         user=os.getenv("DB_USERNAME"),
@@ -14,6 +22,21 @@ def get_connection():
 
 
 def get_subforum_by_name(name):
+    """Fetches a subforum by its name from the database.
+
+    Args
+    -------
+        name : str
+            The name of the subforum.
+
+    Returns
+    -------
+        dict
+            A dictionary containing the subforum's ID, name and description
+        None
+            If the subforum does not exist.
+
+    """
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("SELECT id , name description FROM forums WHERE name = %s", (name,))
@@ -30,6 +53,21 @@ def get_subforum_by_name(name):
 
 
 def get_threads_by_name(name):
+    """Fetches a thread by its name from the database.
+
+    Args
+    -------
+        name : str
+            The name of the thread.
+
+    Returns
+    -------
+        dict
+            A dictionary containing the thread's ID, name and description
+        None
+            If the thread does not exist.
+    """
+
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("SELECT id , name description FROM forums WHERE name = %s", (name,))
@@ -43,6 +81,17 @@ def get_threads_by_name(name):
 
 
 def get_threads_by_forum(forum_id):
+    """Fetches all threads associated with a specific forum based on the forum ID.
+
+    Args
+    -------
+        forum_id : int
+            The ID of the forum.
+    Returns
+    -------
+        list
+            A list of dictionaries, each containing the thread's information.
+    """
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
@@ -76,6 +125,18 @@ def get_threads_by_forum(forum_id):
 
 
 def get_user_profile_db(user_id):
+    """Fetches the user profile from the database based on the user ID.
+
+    Args
+    -------
+        user_id : int
+            The ID of the user.
+
+    Returns
+    -------
+        dict
+            A dictionary containing the user's bio and Spotify URL.
+    """
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("SELECT bio, spotify_url FROM users WHERE id = %s", (user_id,))
@@ -89,6 +150,20 @@ def get_user_profile_db(user_id):
 
 
 def controll_user_login(spotify_id, display_name):
+    """Checks if a user exists in the database and creates a new user if not.
+
+    Args
+    -------
+        spotify_id : str
+            The Spotify ID of the user.
+        display_name : str
+            The display name of the user.
+
+    Returns
+    -------
+        user_id : int
+            The ID of the user in the database.
+    """
     conn = get_connection()
     cur = conn.cursor()
 
@@ -111,6 +186,22 @@ def controll_user_login(spotify_id, display_name):
 
 
 def create_subforum_in_db(name, description, creator_id):
+    """Creates a new subforum in the database.
+
+    Args
+    -------
+        name : str
+            The name of the subforum.
+        description : str
+            The description of the subforum.
+        creator_id : int
+            The ID of the user creating the subforum.
+
+    Returns
+    -------
+        bool
+            True if the subforum was created successfully, False if it already exists.
+    """
     conn = get_connection()
     cur = conn.cursor()
     try:
@@ -130,6 +221,21 @@ def create_subforum_in_db(name, description, creator_id):
 
 
 def update_user_bio(bio, song, creator_id):
+    """Updates the user's bio and Spotify URL in the database.
+
+    Args
+    -------
+        bio : str
+            The bio of the user.
+        song : str
+            The Spotify URL of the user's song.
+        creator_id : int
+            The ID of the user.
+
+    Returns
+    -------
+        None
+    """
     conn = get_connection()
     cur = conn.cursor()
 
@@ -144,6 +250,20 @@ def update_user_bio(bio, song, creator_id):
 
 
 def get_subforum_data(name):
+    """Fetches subforum data by the subforum name.
+
+    Args
+    -------
+        name : str
+            The name of the subforum.
+
+    Returns
+    -------
+        dict
+            A dictionary containing the subforum and its associated threads.
+        None
+            If the subforum does not exist.
+    """
     subforum_dict = get_subforum_by_name(name)
 
     if subforum_dict is None:
