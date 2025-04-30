@@ -39,14 +39,16 @@ def get_subforum_by_name(name):
     """
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("SELECT id , name description FROM forums WHERE name = %s", (name,))
+    cur.execute("SELECT id, name, description FROM forums WHERE name = %s", (name,))
     forum = cur.fetchone()
     cur.close()
     conn.close()
 
-    if forum:
+    if forum is not None:
         forum_id, forum_name, *optional_description = forum
-        description = optional_description[0] if optional_description else None
+
+        description = optional_description[0] if len(optional_description) > 0 else None
+
         return {"id": forum_id, "name": forum_name, "description": description}
     else:
         return None
@@ -70,11 +72,11 @@ def get_threads_by_name(name):
 
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("SELECT id , name description FROM forums WHERE name = %s", (name,))
+    cur.execute("SELECT id, name, description FROM forums WHERE name = %s", (name,))
     forum = cur.fetchone()
     cur.close()
     conn.close()
-    if forum:
+    if forum is not None:
         return {"id": forum[0], "name": forum[1], "description": forum[2]}
     else:
         return None
@@ -144,8 +146,9 @@ def get_user_profile_db(user_id):
     cur.close()
     conn.close()
 
-    bio = results[0] if results else ""
-    spotify_url = results[1] if results else ""
+    bio = results[0] if len(results) > 0 else ""
+    spotify_url = results[1] if len(results) > 0 else ""
+
     return {"bio": bio, "spotify_url": spotify_url}
 
 
@@ -168,9 +171,9 @@ def controll_user_login(spotify_id, display_name):
     cur = conn.cursor()
 
     cur.execute("SELECT id FROM users WHERE spotify_id = %s", (spotify_id,))
-    user = cur.fetchone()
+    user_id = cur.fetchone()
 
-    if not user:
+    if len(user_id) == 0:
         cur.execute(
             "INSERT INTO users(spotify_id, username) VALUES (%s, %s) RETURNING id;",
             (spotify_id, display_name),
@@ -181,8 +184,9 @@ def controll_user_login(spotify_id, display_name):
         conn.close()
         return user_id
     else:
-        user_id = user[0]
-        return user_id
+        cur.close()
+        conn.close()
+        return user_id[0]
 
 
 def create_subforum_in_db(name, description, creator_id):

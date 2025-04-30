@@ -28,7 +28,8 @@ def callback():
 @app.route("/profile")
 def profile():
     token_info = session.get("token_info")
-    if not token_info:
+
+    if token_info is None:
         return redirect(url_for("index"))
 
     user_profile_dict = get_user_profile(token_info["access_token"], session["user_id"])
@@ -47,16 +48,16 @@ def profile():
 @app.route("/create_subforum", methods=["POST"])
 def create_subforum():
     name = request.form.get("name")
-    description = request.form.get("thread_description")
+    description = request.form.get("subforum_description")
     creator_id = session.get("user_id")
 
-    if not creator_id:
+    if creator_id is None:
         return redirect(url_for("index"))
 
     is_subforum_created = create_subforum_in_db(name, description, creator_id)
-    if not is_subforum_created:
+    if is_subforum_created is False:
         return render_template(
-            "error.html", error="Subforum with that name already exists."
+            "error.html", error="Subforum med samma namn existerar redan."
         )
     return redirect(url_for("show_subforum", name=name))
 
@@ -67,7 +68,7 @@ def create_bio():
     song = request.form.get("song")
     creator_id = session.get("user_id")
 
-    if not creator_id:
+    if creator_id is None:
         return redirect(url_for("index"))
 
     update_user_bio(bio, song, creator_id)

@@ -1,5 +1,3 @@
-from operator import attrgetter
-
 from spotipy import Spotify
 
 from db import get_user_profile_db
@@ -65,8 +63,8 @@ def get_user_top_tracks(sp: Spotify):
 
     top_tracks = []
 
-    for t in top_tracks_raw:
-        top_tracks.append({"name": t["name"], "artists": t["artists"][0]})
+    for track in top_tracks_raw:
+        top_tracks.append({"name": track["name"], "artists": track["artists"][0]})
 
     return top_tracks
 
@@ -88,9 +86,12 @@ def get_user_top_artists(sp: Spotify):
         "items"
     ]
     top_artists = []
-    for a in top_artists_raw:
+    for artist in top_artists_raw:
         top_artists.append(
-            {"name": a["name"], "genres": a["genres"][0] if a["genres"] else "unknown"}
+            {
+                "name": artist["name"],
+                "genres": artist["genres"] if len(artist["genres"]) > 0 else "unknown",
+            }
         )
     return top_artists
 
