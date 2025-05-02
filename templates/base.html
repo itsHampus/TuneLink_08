@@ -40,26 +40,15 @@
             <i class="fas fa-music me-3"></i>
             <span class="hide-on-collapse">Skapa ett nytt Subforum</span>
           </a>
-          <a href="#" class="sidebar-link active text-decoration-none p-3">
+          {% for forum in subscribed_forums%}
+          <a href="{{ url_for('show_subforum', name=forum['name']) }}" class="sidebar-link text-decoration-none p-3"
+            class="sidebar-link text-decoration-none p-3 {% if forum ['name'] == name %}active{% endif %}">
             <i class="fas fa-music me-3"></i>
-            <span class="hide-on-collapse">Kent</span>
+            <span class="hide-on-collapse">{{ forum['name'] }}</span>
           </a>
-          <a href="#" class="sidebar-link text-decoration-none p-3">
-            <i class="fas fa-music me-3"></i>
-            <span class="hide-on-collapse">The Smiths</span>
-          </a>
-          <a href="#" class="sidebar-link text-decoration-none p-3">
-            <i class="fas fa-music me-3"></i>
-            <span class="hide-on-collapse">Oasis</span>
-          </a>
-          <a href="#" class="sidebar-link text-decoration-none p-3">
-            <i class="fas fa-music me-3"></i>
-            <span class="hide-on-collapse">Radiohead</span>
-          </a>
-          <a href="#" class="sidebar-link text-decoration-none p-3">
-            <i class="fas fa-music me-3"></i>
-            <span class="hide-on-collapse">Blur</span>
-          </a>
+          {% else %}
+          <div class="text-muted px-3 py-2 small">Du prenumererar inte på några subforum än!</div>
+          {% endfor %}
         </div>
 
         <div class="profile-section mt-auto p-4">

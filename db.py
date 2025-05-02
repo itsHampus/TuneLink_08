@@ -276,3 +276,108 @@ def get_subforum_data(name):
     threads = get_threads_by_forum(subforum_dict["id"])
 
     return {"subforum": subforum_dict, "threads": threads}
+
+def subscribe_to_forum(user_id, forum_id):
+    """Subscribes a user to a subforum
+
+    Args
+    -------
+        user_id : int
+            The ID of the user.
+        forum_id : int
+            The ID of the subforum
+
+
+    Returns
+    -------"""
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """
+            INSERT INTO subforum_subscriptions (user_id, forum_id)
+            VALUES (%s, %s)
+            ON CONFLICT DO NOTHING RETURNING id
+            """,
+            (user_id, forum_id)
+        )
+        inserted = cur.fetchone()
+        conn.commit()
+        return inserted
+    finally:
+        cur.close()
+        conn.close()
+        return None
+
+def unsubscribe_from_forum(user_id, forum_id):
+    """
+    Unsubscribes a user from a subforum
+
+    Args
+    -------
+        user_id : int
+            The ID of the user.
+        forum_id : int
+            The ID of the subforum
+
+
+    Returns
+    -------
+        Inserted
+
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """
+            DELETE FROM subforum_subscriptions
+            WHERE user_id = %s AND forum_id = %s
+            RETURNING id
+            """,
+            (user_id, forum_id)
+        )
+        deleted = cur.fetchone()
+        conn.commit()
+        return deleted
+    finally:
+        cur.close()
+        conn.close()
+        return None
+
+def get_user_subscriptions(user_id):
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """
+            SELECT forums.id, forums.name
+            FROM forums
+            JOIN subforum_subscriptions ON forums.id = subforum_subscriptions.forum_id
+            WHERE subforum_subscriptions.user_id = %s
+            """,
+            (user_id,))
+        rows = cur.fetchall()
+        return [{"id": row[0], "name": row [1]} for row in rows]
+    finally:
+        cur.close()
+        conn.close()
+
+def get_subforum_by_name(name):
+    """""fetches a subforum by its name from the database."""
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            SELECT id, name, description
+            FROM forums
+            WHERE name = %s
+            """, (name,))
+        row = cur.fetchone()
+        print("DEBUG rows from DB:", row)
+        if row is not None:
+            return {"id": row[0], "name": row[1]}
+        return None
+    finally:
+        cur.close()
+        conn.close()
