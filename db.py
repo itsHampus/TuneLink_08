@@ -276,3 +276,36 @@ def get_subforum_data(name):
     threads = get_threads_by_forum(subforum_dict["id"])
 
     return {"subforum": subforum_dict, "threads": threads}
+
+def search_subforums_by_name(query):
+    """
+    Searches for subforums by its name
+
+    Args
+    ------
+        query : str
+            The name of the subforum.
+
+    Returns
+    -------
+        list : [dict]
+            A list of dictionaries containing the subforum names.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """
+            SELECT id, name, description
+            FROM forums
+            WHERE LOWER (name) LIKE LOWER (%s)
+            ORDER BY name ASC
+            LIMIT 10
+            """,
+            (f"%{query}%",)
+        )
+        rows = cur.fetchall()
+        return [{"id": row[0], "name": row[1], "description": row[2]} for row in rows]
+    finally:
+        cur.close()
+        conn.close()
