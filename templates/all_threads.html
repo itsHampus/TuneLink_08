@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container mt-5">
+    <h2>Alla trådar</h2>
+    <ul>
+      {% for thread in threads %}
+        <li><strong>{{ thread[1] }}</strong> skapad av {{ thread[3] }} i {{ thread[4] }} - {{ thread[2] }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endblock %}
