@@ -277,6 +277,7 @@ def get_subforum_data(name):
 
     return {"subforum": subforum_dict, "threads": threads}
 
+
 def subscribe_to_forum(user_id, forum_id):
     """Subscribes a user to a subforum
 
@@ -324,7 +325,6 @@ def unsubscribe_from_forum(user_id, forum_id):
     Returns
     -------
         Inserted
-
     """
     conn = get_connection()
     cur = conn.cursor()
@@ -344,6 +344,42 @@ def unsubscribe_from_forum(user_id, forum_id):
         cur.close()
         conn.close()
         return None
+
+
+def search_subforums_by_name(query):
+    """
+    Searches for subforums by its name
+
+    Args
+    ------
+        query : str
+            The name of the subforum.
+
+    Returns
+    -------
+        list : [dict]
+            A list of dictionaries containing the subforum names.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """
+             SELECT id, name, description
+            FROM forums
+            WHERE LOWER (name) LIKE LOWER (%s)
+            ORDER BY name ASC
+            LIMIT 10
+            """,
+            (f"%{query}%",)
+        )
+        rows = cur.fetchall()
+        return [{"id": row[0], "name": row[1], "description": row[2]} for row in rows]
+    finally:
+        cur.close()
+        conn.close()
+
+          
 
 def get_user_subscriptions(user_id):
     conn = get_connection()
