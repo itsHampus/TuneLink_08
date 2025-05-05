@@ -1,5 +1,5 @@
 {% extends 'base.html' %} {% block content %}
-<h1 class="text-center">{{ forum.name }}</h1>
+<h1 class="text-center">{{ forum["name"] }}</h1>
 <div class="text-center my-4">
     <button type="button" class="btn btn-secondary btn-lg" data-bs-toggle="modal" data-bs-target="#start_thread_modal">
         <i class="bi bi-plus-lg me-2"></i>
@@ -9,102 +9,77 @@
 
       {% for thread in threads %}
       <div class="center_wrapper">
-        <div class="thread_card card mb-4">
-          <div class="card-body">
-            <p class="card-text"><small class="text-muted">Startad av {{ thread.creator_name }}</small></p>
+        <div class="thread_card card">
+          <p class="card-text"><small class="text-muted">Postad av användare {{ thread.creator_id }}</small></p>
+      
+          <a href="{{ url_for('show_thread', thread_id=thread.id) }}" class="text-decoration-none text-dark">
             <h5 class="text-center card-title">{{ thread.title }}</h5>
-            {% if thread.image_url %}
-            <img class="thread_image card-img-top my-3" src="{{ thread.image_url }}" alt="Spotify bild">
-            {% endif %}
+          </a>
+      
+          <img class="thread_image card-img-top" src="https://i.scdn.co/image/ab67616d0000b273fe168e1e3b834412cbe77793" alt="Thread image">
+          <div class="card-body">
             <p class="card-text">{{ thread.description }}</p>
-            <p class="card-text"><small class="text-muted">Senast uppdaterad: {{ thread.last_updated }}</small></p>
-            <div class="d-flex gap-2">
-              <button type="button" class="btn btn-secondary">
-                <i class="bi bi-hand-thumbs-up"></i>
-              </button>
-              <button type="button" class="btn btn-secondary">
-                <i class="bi bi-hand-thumbs-down"></i>
-              </button>
+            <p class="card-text"><small class="text-muted">Senast uppdaterad {{ thread.updated_at }}</small></p>
+            <div class="d-flex gap-2 mb-3">
+              <button type="button" class="btn btn-secondary"><i class="bi bi-hand-thumbs-up"></i></button>
+              <button type="button" class="btn btn-secondary"><i class="bi bi-hand-thumbs-down"></i></button>
+              <a href="{{ url_for('show_thread', thread_id=thread.id) }}" class="btn btn-secondary">
                 <i class="bi bi-chat-dots-fill"></i>
               </a>
-              <button type="button" class="btn btn-secondary">
-                <i class="bi bi-share"></i>
-              </button>
+              <button type="button" class="btn btn-secondary"><i class="bi bi-share"></i></button>
             </div>
           </div>
         </div>
       </div>
       {% endfor %}
+</div>
 
-
-<div class="container my-4">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="card bg-light shadow-sm">
-          <div class="card-header">
-              <strong>Beskrivning och regler</strong>
-          </div>
-          <div class="card-body">
-              <p class="card-text text-center">{{ forum.description }}</p>
-          </div>
-      </div>
+<div class="col-md-4">
+    <div class="card bg-light shadow-sm">
+        <div class="card-header">
+            <strong>Beskrivning och regler</strong>
+        </div>
+        <div class="card-body">
+            <p class="card-text text-center">{{ forum["description"] }}</p>
+        </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <div class="modal fade" id="start_thread_modal" tabindex="-1" aria-labelledby="start_thread_modal_label" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
 
+      <form method="post" action="{{ url_for('create_thread_from_subforum', forum_id=forum.id) }}">
         <div class="modal-header">
           <h5 class="modal-title" id="start_thread_modal_label">Starta En Ny Thread</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Stäng"></button>
         </div>
 
         <div class="modal-body">
-          <div class="card mb-4">
-            <div class="card-body">
-              <form>
-                <div class="mb-3">
-                  <label for="thread_title" class="form-label">Titel</label>
-                  <input type="text" class="form-control" id="thread_title" placeholder="Ange en titel...">
-                </div>
-                <div class="mb-3">
-                  <label for="spotify_url" class="form-label">Spotify URL</label>
-                  <input type="text" class="form-control" id="spotify_url" placeholder="Ange en Spotify URL...">
-                </div>
-                <div class="mb-3">
-                  <label for="thread_description" class="form-label">Comment</label>
-                  <textarea class="form-control" id="thread_description" rows="3" placeholder="Beskrivning..."></textarea>
-                </div>
-                <div class="d-flex justify-content-end gap-2">
-                  <button type="submit" class="btn btn-primary">Posta Thread</button>
-                  <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Avbryt</button>
-                </div>
-              </form>
-            </div>
+          <div class="mb-3">
+            <label for="thread_title" class="form-label">Titel</label>
+            <input type="text" class="form-control" id="thread_title" name="title" placeholder="Ange en titel..." required>
+          </div>
+          <div class="mb-3">
+            <label for="spotify_url" class="form-label">Spotify URL</label>
+            <input type="text" class="form-control" id="spotify_url" name="spotify_url" placeholder="Ange en Spotify URL...">
+          </div>
+          <div class="mb-3">
+            <label for="thread_description" class="form-label">Beskrivning</label>
+            <textarea class="form-control" id="thread_description" name="description" rows="3" placeholder="Beskrivning..." required></textarea>
           </div>
         </div>
 
-      </div>
-    </div>
-  </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Posta Thread</button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Avbryt</button>
+        </div>
+      </form>
 
-  <div class="center_wrapper">
-    <div class="card mb-4">
-      <div class="card-body">
-        <form method="POST" action="{{ url_for('create_subforum_post', subforum_id=forum.id) }}">
-          <div class="mb-3">
-            <label for="post_content" class="form-label">Skriv ett inlägg</label>
-            <textarea class="form-control" id="post_content" name="content" rows="3" placeholder="Vad vill du säga?"></textarea>
-          </div>
-          <div class="d-flex justify-content-end">
-            <button type="submit" class="btn btn-primary">Publicera</button>
-          </div>
-        </form>
-      </div>
     </div>
   </div>
+</div>
 
 
 {% endblock %}
