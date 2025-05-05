@@ -48,6 +48,9 @@
             <div class="fw-bold">{{ track.name }}</div>
             {{ track.artist }}
           </div>
+          <a href="{{ track.spotify_url }}" target="_blank" class="btn btn-outline-success btn-sm ms-3">
+            <i class="fab fa-spotify me-1"></i>Spela i Spotify
+          </a>
         </li>
         {% endfor %}
       </ol>
@@ -60,12 +63,14 @@
         <li class="list-group-item d-flex justify-content-between align-items-start">
           <div class="ms-2 me-auto">
             <div class="fw-bold">{{ artist.name }}</div>
-          </div>
+            </div>
+            <a href="{{ artist.spotify_url }}" target="_blank" class="btn btn-outline-success btn-sm ms-3">
+              <i class="fab fa-spotify me-1"></i>Öppna i Spotify
+            </a>
         </li>
         {% endfor %}
       </ol>
     </div>
-  </div>
 
   <div class="modal fade" id="create_bio_modal" tabindex="-1" aria-labelledby="create_bio" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

@@ -64,7 +64,7 @@ def get_user_top_tracks(sp: Spotify):
     top_tracks = []
 
     for track in top_tracks_raw:
-        top_tracks.append({"name": track["name"], "artists": track["artists"][0]})
+        top_tracks.append({"name": track["name"], "artists": track["artists"][0]["name"],"spotify_url": track["uri"]})
 
     return top_tracks
 
@@ -91,6 +91,7 @@ def get_user_top_artists(sp: Spotify):
             {
                 "name": artist["name"],
                 "genres": artist["genres"] if len(artist["genres"]) > 0 else "unknown",
+                "spotify_url": artist["uri"]
             }
         )
     return top_artists
