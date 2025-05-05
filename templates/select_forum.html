@@ -1,0 +1,17 @@
+{% extends "indexbase.html" %}
+{% block content %}
+<h2>Välj forum att skapa tråd i</h2>
+<form method="post">
+    <input type="hidden" name="title" value="{{ title }}">
+    <input type="hidden" name="spotify_url" value="{{ spotify_url }}">
+    <input type="hidden" name="description" value="{{ description }}">
+
+    <label for="forum_id">Välj forum:</label>
+    <select name="forum_id" required>
+        {% for forum in forums %}
+            <option value="{{ forum.id }}">{{ forum.name }}</option>
+        {% endfor %}
+    </select>
+    <input type="submit" value="Skapa tråd direkt">
+</form>
+{% endblock %}
