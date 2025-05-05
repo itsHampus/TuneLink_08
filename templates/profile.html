@@ -96,4 +96,16 @@
     </div>
   </div>
 
+  <!-- Starta tråd-knapp som borde fungera i godtycklig sida -->
+    <a href="{{ url_for('select_forum_to_create_thread') }}" class="btn btn-primary mt-4">Starta en ny tråd</a>
+
+  <h3>Dina trådar</h3>
+<ul>
+  {% for thread in threads %}
+    <li>
+      <a href="{{ url_for('view_thread', thread_id=thread.id) }}">{{ thread.title }}</a>
+    </li>
+  {% endfor %}
+</ul>
+
 {% endblock %}
