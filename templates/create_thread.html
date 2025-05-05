@@ -1,0 +1,13 @@
+<form method="post">
+  <input type="hidden" name="title" value="{{ title }}">
+  <input type="hidden" name="spotify_url" value="{{ spotify_url }}">
+  <input type="hidden" name="description" value="{{ description }}">
+
+  <label for="forum_id">Välj forum:</label>
+  <select name="forum_id">
+      {% for forum in forums %}
+          <option value="{{ forum.id }}">{{ forum.name }}</option>
+      {% endfor %}
+  </select>
+  <input type="submit" value="Gå vidare">
+</form>
