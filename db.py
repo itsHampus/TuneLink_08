@@ -573,3 +573,10 @@ def update_thread(thread_id, title, description):
     conn.commit()
     cur.close()
     conn.close()
+
+def get_forum_name_by_id(forum_id):
+    conn = get_connection()
+    with conn.cursor() as cur:
+        cur.execute("SELECT name FROM forums WHERE id = %s", (forum_id,))
+        result = cur.fetchone()
+        return result[0] if result else None
