@@ -196,5 +196,106 @@ def ajax_search_subforums():
     return jsonify(results)
 
 
+# create thread button
+@app.route('/create_thread', methods=['GET', 'POST'])
+def select_forum_to_create_thread():
+    if request.method == 'POST':
+        forum_id = request.form.get('forum_id')
+        if not forum_id:
+            return render_template("error.html", error="Inget subforum valt.")
+        return redirect(url_for("create_thread", forum_id=forum_id))
+
+    forums = get_all_forums()
+    user = get_user(session["token_info"]["access_token"])
+    return render_template('select_forum.html', forums=forums, user=user)
+
+# formulär för att skapa tråd
+@app.route('/create_thread/<int:forum_id>', methods=['GET', 'POST'])
+def create_thread(forum_id):
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for("index"))
+
+    if request.method == 'POST':
+        title = request.form.get("title")
+        spotify_url = request.form.get("spotify_url")
+        description = request.form.get("description")
+
+        success = create_thread_in_db(forum_id, user_id, title, spotify_url, description)
+        if success:
+            forum_name = get_forum_name_by_id(forum_id)
+            return redirect(url_for("show_subforum", name=forum_name))
+        else:
+            return render_template("error.html", error="Kunde inte skapa tråd.")
+
+    # getting forum data
+    subforum_data_dict = get_subforum_data(get_forum_name_by_id(forum_id))
+    if subforum_data_dict is None:
+        return render_template("error.html", error="Subforumet existerar inte.")
+
+    user = get_user(session["token_info"]["access_token"])
+
+    return render_template(
+        "subforum.html",
+        forum=subforum_data_dict["subforum"],
+        threads=subforum_data_dict["threads"],
+        user=user,
+    )
+
+@app.route("/thread/<int:thread_id>/comment", methods=["GET", "POST"])
+def create_comment(thread_id):
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        description = request.form["description"]
+        spotify_url = request.form.get("spotify_url")
+        user_id = session["user_id"]
+
+        db.execute(
+            "INSERT INTO t_comments (thread_id, user_id, description, spotify_url) VALUES (%s, %s, %s, %s)",
+            (thread_id, user_id, description, spotify_url)
+        )
+        return redirect(url_for("show_thread", thread_id=thread_id))
+
+    thread = db.fetchone("SELECT * FROM threads WHERE id = %s", (thread_id,))
+    return render_template("create_comment.html", thread=thread)
+
+# to create a thread
+@app.route('/forum/<int:forum_id>/create_thread', methods=['POST'])
+def create_thread_from_subforum(forum_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    title = request.form.get('title')
+    spotify_url = request.form.get('spotify_url')
+    description = request.form.get('description')
+    user_id = session['user_id']
+
+    db.create_thread(title=title, spotify_url=spotify_url, description=description, user_id=user_id, forum_id=forum_id)
+
+    return redirect(url_for('forum_view', forum_id=forum_id))
+
+
+@app.route("/thread/<int:thread_id>")
+def show_thread(thread_id):
+    from db import get_thread_by_id, get_comments_by_thread
+
+    thread = get_thread_by_id(thread_id)
+    if not thread:
+        return render_template("error.html", error="Tråden kunde inte hittas.")
+
+    comments = get_comments_by_thread(thread_id)
+    user = get_user(session["token_info"]["access_token"])
+
+    return render_template("thread.html", thread=thread, comments=comments, user=user)
+
+# to get the threads on an arbitrary page
+@app.route('/all_threads')
+def all_threads():
+    threads = db.get_all_threads()
+    return render_template('all_threads.html', threads=threads)
+
+
 if __name__ == "__main__":
     app.run(debug=True)
