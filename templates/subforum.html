@@ -1,10 +1,25 @@
 {% extends 'base.html' %} {% block content %}
-<h1 class="text-center">{{ forum.name }}</h1>
+<h1 class="text-center">{{ forum["name"] }}</h1>
 <div class="text-center my-4">
+  <div class="d-flex justify-content-center align-items-center gap-2">
     <button type="button" class="btn btn-secondary btn-lg" data-bs-toggle="modal" data-bs-target="#start_thread_modal">
-        <i class="bi bi-plus-lg me-2"></i>
-        Starta tråd
-      </button>
+      <i class="bi bi-plus-lg me-2"></i>
+      Starta tråd
+    </button>
+
+    {% if forum["id"] in subscribed_forum_ids %}
+    <form action="{{ url_for('unsubscribe', name=forum["name"]) }}" method="post" class="mb-0">
+      <button type="submit" class="btn btn-danger btn-lg">Avprenumerera</button>
+    </form>
+    {% else %}
+    <form action="{{ url_for('subscribe', name=forum["name"]) }}" method="post" class="mb-0">
+      <button type="submit" class="btn btn-success btn-lg">Prenumerera</button>
+    </form>
+    {% endif %}
+  </div>
+
+
+
 
 
 {% for thread in threads %}
@@ -45,7 +60,7 @@
             <strong>Beskrivning och regler</strong>
         </div>
         <div class="card-body">
-            <p class="card-text text-center">{{ forum.description }}</p>
+            <p class="card-text text-center">{{ forum["description"] }}</p>
         </div>
         </div>
     </div>
