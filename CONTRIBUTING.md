@@ -10,59 +10,78 @@
 7. [Hotfixes](#hotfixes)
 
 ## Getting Started
-
-1. **Fork the repository to your Github**
-2. **Clone your forked repository**:
+### Prerequisites
+1. **Python Version:** Ensure you have Python 3.10 or higher installed. Check version by running:
     ```bash
-    git clone https://github.com/<your-username>/TuneLink_08.git
-3. **Set up the virtual environment**:
+    python3 --version
+or
+    ```bash
+    python --version
+2. **PostgreSQL:** Install PostgreSQL for database management. Ensure it is running and accessible. 
+3. **Spotify Developer Account:** You need access to Spotify Developer credentials (client ID and client secret). Contact `nutvendor` on Discord to be added as a user. 
+
+### Setup Instructions
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/<your-username>/TuneLink_08.git
+   cd TuneLink_08
+2. **Set up a Virtual Environment:**
     ```bash
     python3 -m venv .venv
     source .venv/bin/activate
-4. **Install Dependencies:**
+3. **Install Dependencies:**
     ```bash
+    pip install --upgrade pip
     pip install -r requirements.txt
-5. **Set up Environment Variables**: Create a `.env` file in the root directory and add the following:
-    - FLASK_SECRET=your_flask_secret_key 
-    - SPOTIPY_CLIENT_ID=contact_nutvendor_on_discord 
-    - SPOTIPY_CLIENT_SECRET=contact_nutvendor_on_discord
-    - SPOTIPY_REDIRECT_URI=http://127.0.0.1:5000/callback
-    - SPOTIPY_SCOPE=user-top-read
-Contact `nutvendor` on discord for Spotify keys, also send your name and email (linked to Spotify) to be added as a user. You must be a registered user to use the API and therefore also the app. 
-6. **Install dependecies**:
+4. **Set up Environment Variables:** Create a `.env` file in the root directory and add the following:
     ```bash
-    pip install -r requirements.txt
+    FLASK_SECRET = your_flask_secret_key 
+    SPOTIPY_CLIENT_ID = your_spotify_client_id 
+    SPOTIPY_CLIENT_SECRET = your_spotify_client_secret
+    SPOTIPY_REDIRECT_URI = http://127.0.0.1:5000/callback
+    SPOTIPY_SCOPE = user-top-read  
+    DB_NAME = your_database_name
+    DB_USERNAME = your_database_username
+    DB_USER_PASSWORD = your_database_password
+    DB_HOST = your_database_host
+    DB_PORT = 5432
+
+- Replace placeholders with your actual credentials. 
+- Contact `nutvendor` on discord for Spotify keys, also send your name and email (linked to Spotify) to be added as a user. You must be a registered user to use the API and therefore also the app. 
+5. **Run the Application**:
+    ```bash
+    flask run
+
+6. **Access the Application:** Open your browser and navigate to `http://127.0.0.1:5000`
+
 
 
 ## Development Workflow
-The project follows the Gitflow workflow. Use the following approach for development:
-
-1. Pull the latest changes:
-Always pull the latest changes from the `dev` branch before starting to work:
+# Development Workflow
+The project follows the **Gitflow** workflow. Use the following approach for development:
+1. **Pull the latest changes:** 
+Allways pull the latest changes from the `dev` branch before starting to work:
     ```bash
     git checkout dev
     git pull origin dev
-
-2. Create a feature branch from `dev` with a descriptive name:
+2. **Create a feature branch from `dev`:** 
     ```bash
     git checkout -b feature/your-feature-name
-
-3. Work in the branch, reguarly commiting and pushing changes:
+3. **Work on your feature:**
+Make changes, commit regularly and push to your branch:
     ```bash
     git add .
     git commit -m "Add feature: your-feature-name"
-    git push origin feature/your-feature-name
-
-4. When a feature is complete, create a pull request (PR) to dev.
-5. Team members will review the code and test the functionality. 
-6. Once the PR is approved, merge the feature into dev. 
-7. Delete the feature branch if it is no longer needed:
-    ```bash
-    git branch -d feature/your-feature-name
-
+    git push origin your-branch-name
+4. **Create a Pull Request (PR):**
+When your feature is complete, create a pull request to the `dev` branch.
+5. **Code Review:** 
+Team members will review your code. Address any feedback provided before any new review request.
+6. **Merge of branch:**
+Once approved, your branch will be merged into `dev` and your feature branch will be deleted.
 
 ## Bucket Releases
-At the end of each sprint, the completed features in `dev` are collected and merged into `main` as part of a **bucket release**. Follow these steps:
+At the end of each sprint, completed features in `dev` are collected and merged into `main` as part of a **bucket release**. Follow these steps:
 
 1. Perform final testing of the `dev` branch.
 2. Fix any bugs before merging into `main`. 
@@ -82,10 +101,10 @@ The project uses a **peer review process** to ensure code quality. All pull requ
 
 ## Coding Standards
 1. Follow [PEP 8](https://peps.python.org/pep-0008/) for Python code style. 
-- Use flake8 to check for code style violations:
+- Use `flake8` to check for code style violations:
     ```bash
     flake8 .
-- Use black for automatic code formatting across the project:
+- Use `black` for automatic code formatting across the project:
     ```bash
     black .
 2. Use type annotations where applicable.
