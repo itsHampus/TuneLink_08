@@ -10,6 +10,8 @@ TuneLink is a web based forum that integrates with Spotify to help users find pe
 - **Genre Insights**: Discover the genres you listen to the most.
 - **User Profile**: Display your Spotify profile information, including your profile picture and display name. 
 
+---
+
 ## Table of Contents
 
 1. [Getting Started](#getting-started)
@@ -22,12 +24,9 @@ TuneLink is a web based forum that integrates with Spotify to help users find pe
 ## Getting Started 
 
 ### Prerequisites
-1. **Python Version:** Ensure you have Python 3.10 or higher installed. Check version by running:
+1. **Python Version**: Ensure you have Python 3.10 or higher installed. Check your version by running:
     ```bash
     python3 --version
-or
-    ```bash
-    python --version
 2. **PostgreSQL:** Install PostgreSQL for database management. Ensure it is running and accessible. 
 3. **Spotify Developer Account:** You need access to Spotify Developer credentials (client ID and client secret). Contact `nutvendor` on Discord to be added as a user. 
 ---
