@@ -36,16 +36,13 @@
       </div>
     </nav>
 
-
     <div class="d-flex">
-
-      <nav class="sidebar d-flex flex-column flex-shrink-0 position-fixed">
-
-        <div class="p-4">
-          <p class="text small hide-on-collapse">SubForum</p>
-        </div>
-
+      <nav class="sidebar d-flex flex-column flex-shrink-0 position-fixed">        
         <div class="nav flex-column">
+          <a href="{{ url_for('profile') }}" class="sidebar-link text-decoration-none p-3 active">
+            <i class="bi bi-house-door me-3"></i>
+            <span class="hide-on-collapse">Home</span>
+          </a>
           <a href="#" class="sidebar-link active text-decoration-none p-3" data-bs-toggle="modal" data-bs-target="#start_subforum_modal">
 
             <i class="fas fa-music me-3"></i>
