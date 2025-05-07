@@ -42,6 +42,34 @@
     <p>Inga kommentarer än. Bli den första att kommentera!</p>
   {% endif %}
 
+  <!-- Modal för redigering -->
+  <div class="modal fade" id="edit_comment_modal_{{ comment.id }}" tabindex="-1" aria-labelledby="editCommentLabel_{{ comment.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form method="post" action="{{ url_for('edit_comment_get', comment_id=comment.id) }}">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editCommentLabel_{{ comment.id }}">Redigera kommentar</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Stäng"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="edit_description_{{ comment.id }}" class="form-label">Kommentar</label>
+              <textarea class="form-control" name="description" id="edit_description_{{ comment.id }}" rows="3" required>{{ comment.description }}</textarea>
+            </div>
+            <div class="mb-3">
+              <label for="edit_spotify_url_{{ comment.id }}" class="form-label">Spotify URL</label>
+              <input type="text" class="form-control" name="spotify_url" id="edit_spotify_url_{{ comment.id }}" value="{{ comment.spotify_url }}">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Spara</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Avbryt</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- Lägg till kommentar -->
   <div class="card">
     <div class="card-body">
@@ -61,4 +89,9 @@
   </div>
 
 </div>
+
+<!-- edit comment button -->
+<button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#edit_comment_modal_{{ comment.id }}">
+  <i class="bi bi-pencil"></i>
+</button>
 {% endblock %}
