@@ -6,7 +6,7 @@ from flask import Flask, redirect, render_template, request, session, url_for, j
 
 from auth import handle_callback, spotify_auth
 import db
-from db import create_subforum_in_db, get_subforum_data, update_user_bio,search_subforums_by_name,  subscribe_to_forum, unsubscribe_from_forum, get_user_subscriptions,get_user_profile_db,get_subforum_by_name, get_all_forums, get_forum_name_by_id, create_thread, get_thread_by_id, get_comments_for_thread, create_comment
+from db import create_subforum_in_db, get_subforum_data, update_user_bio,search_subforums_by_name,  subscribe_to_forum, unsubscribe_from_forum, get_user_subscriptions,get_user_profile_db,get_subforum_by_name, get_all_forums, get_forum_name_by_id, create_thread, get_thread_by_id, get_comments_for_thread, create_comment, update_post
 from spotify import get_user, get_user_profile
 from spotipy import Spotify
 
@@ -293,6 +293,32 @@ def show_thread(thread_id):
     thread = get_thread_by_id(thread_id)
     comments = get_comments_for_thread(thread_id)
     return render_template("post.html", thread=thread, comments=comments)
+
+
+@app.route("/edit_post/<int:post_id>", methods=["GET"])
+def edit_post_get(post_id):
+    post = get_thread(post_id)
+    return render_template("subforum.html", post=post)
+
+@app.route("/edit_post/<int:post_id>", methods=["POST"])
+def edit_post_post(post_id):
+    new_title = request.form["title"]
+    new_description = request.form["description"]
+    update_post(post_id, new_title, new_description)
+    return redirect(url_for("thread", thread_id=post_id))
+
+@app.route("/edit_comment/<int:comment_id>", methods=["GET"])
+def edit_comment_get(comment_id):
+    comment = get_comment(comment_id)
+    return render_template("post.html", comment=comment)
+
+@app.route("/edit_comment/<int:comment_id>", methods=["POST"])
+def edit_comment_post(comment_id):
+    new_description = request.form["description"]
+    new_spotify_url = request.form.get("spotify_url")  # optional
+    thread_id = request.form["thread_id"]
+    update_comment(comment_id, new_description, new_spotify_url)
+    return redirect(url_for("thread", thread_id=thread_id))
 
 # to get the threads on an arbitrary page
 @app.route('/all_threads')
