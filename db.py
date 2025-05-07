@@ -574,3 +574,37 @@ def get_forum_name_by_id(forum_id):
 
 def db_get_thread_by_id(thread_id):
     return db.fetchone("SELECT * FROM threads WHERE id = %s", (thread_id,))
+
+# function to edit post
+def update_post(post_id, new_title, new_description):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "UPDATE t_threads SET title = %s, description = %s WHERE id = %s",
+        (new_title, new_description, post_id)
+    )
+    conn.commit()
+    cur.close()
+    conn.close()
+
+# function to edit comment
+def update_comment(comment_id, new_description, new_spotify_url=None):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "UPDATE t_comments SET description = %s, spotify_url = %s WHERE id = %s",
+        (new_description, new_spotify_url, comment_id)
+    )
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
+def get_comment(comment_id):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM t_comments WHERE id = %s", (comment_id,))
+    comment = cur.fetchone()
+    cur.close()
+    conn.close()
+    return comment
