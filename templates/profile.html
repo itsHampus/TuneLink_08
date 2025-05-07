@@ -1,4 +1,7 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %}
+
+{% block content %}
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
@@ -7,6 +10,8 @@
   <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico" />
   <title>TuneLink</title>
 </head>
+
+
 <div class="container mt-5 text-center">
 
   <div class="profil_card card" >
@@ -31,18 +36,18 @@
 
   <hr class="my-4" />
 
-   <!-- Starta tråd-knapp som borde fungera i godtycklig sida -->
-    <a href="{{ url_for('select_forum_to_create_thread') }}" class="btn btn-primary mt-4">Starta en ny tråd</a>
+          <!-- Starta tråd-knapp som borde fungera i godtycklig sida -->
+          <a href="{{ url_for('show_forum_selection') }}" class="btn btn-primary mt-4">Starta en ny tråd</a>
         
-  <!-- listar alla trådar på en godtycklig sida -->
-  <h3>Dina trådar</h3>
-<ul>
-  {% for thread in threads %}
-    <li>
-      <a href="{{ url_for('view_thread', thread_id=thread.id) }}">{{ thread.title }}</a>
-    </li>
-  {% endfor %}
-</ul>
+          <!-- listar alla trådar på en godtycklig sida -->
+          <h3>Dina trådar</h3>
+        <ul>
+          {% for thread in threads %}
+            <li>
+              <a href="{{ url_for('view_thread', thread_id=thread.id) }}">{{ thread.title }}</a>
+            </li>
+          {% endfor %}
+        </ul>
 
   <h4>Genrer du lyssnar på</h4>
   <div class="d-flex justify-content-center flex-wrap mb-4">
@@ -111,6 +116,7 @@
           </div>
         </form>
       </div>
+
     </div>
   </div>
 
