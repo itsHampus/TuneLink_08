@@ -25,9 +25,18 @@ TuneLink is a web based forum that integrates with Spotify to help users find pe
 
 ### Prerequisites
 1. **Python Version**: Ensure you have Python 3.10 or higher installed. Check your version by running:
-    ```bash
-    python3 --version
-2. **PostgreSQL:** Install PostgreSQL for database management. Ensure it is running and accessible. 
+    ```
+    {
+        python3 --version
+    }
+    ```
+    or
+    ```
+    {
+        python --version
+    }
+    ```
+2. **PostgreSQL:** Install [PostgreSQL](https://www.postgresql.org/download/) for database management. Ensure it is running and accessible. 
 3. **Spotify Developer Account:** You need access to Spotify Developer credentials (client ID and client secret). Contact `nutvendor` on Discord to be added as a user. 
 ---
 ### Setup Instructions
