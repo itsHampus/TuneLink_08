@@ -19,9 +19,6 @@
   </div>
 
 
-
-
-
 {% for thread in threads %}
       <div class="center_wrapper">
         <div class="thread_card card">
@@ -42,11 +39,47 @@
                 <i class="bi bi-chat-dots-fill"></i>
               </a>
               <button type="button" class="btn btn-secondary"><i class="bi bi-share"></i></button>
+               <!-- edit button for post -->
+              <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#edit_thread_modal_{{ thread.id }}">
+                <i class="bi bi-pencil"></i>
+              </button>
             </div>
           </div>
         </div>
 
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- edit modal -->
+<div class="modal fade" id="edit_thread_modal_{{ thread.id }}" tabindex="-1" aria-labelledby="editThreadModalLabel_{{ thread.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="post" action="{{ url_for('edit_post_get', post_id=thread.id) }}">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editThreadModalLabel_{{ thread.id }}">Redigera tråd</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Stäng"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="edit_title_{{ thread.id }}" class="form-label">Titel</label>
+            <input type="text" class="form-control" id="edit_title_{{ thread.id }}" name="title" value="{{ thread.title }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="edit_description_{{ thread.id }}" class="form-label">Beskrivning</label>
+            <textarea class="form-control" id="edit_description_{{ thread.id }}" name="description" rows="3" required>{{ thread.description }}</textarea>
+          </div>
+          <div class="mb-3">
+            <label for="edit_spotify_url_{{ thread.id }}" class="form-label">Spotify URL</label>
+            <input type="text" class="form-control" id="edit_spotify_url_{{ thread.id }}" name="spotify_url" value="{{ thread.spotify_url }}">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Spara ändringar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Avbryt</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -101,6 +134,7 @@
   </div>
 </div>
 
+
  <!-- Starta tråd-knapp som borde fungera i godtycklig sida -->
  <a href="{{ url_for('show_forum_selection') }}" class="btn btn-primary mt-4">Starta en ny tråd</a>
         
@@ -113,6 +147,11 @@
    </li>
  {% endfor %}
 </ul>
+
+
+
+
+
 
 
 {% endblock %}
