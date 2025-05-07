@@ -1,7 +1,7 @@
 import os
 
 import psycopg2
-
+from psycopg2 import extras
 
 def get_connection():
     """Establishes a connection to the PostgreSQL database.
