@@ -13,11 +13,11 @@ def get_connection():
 
     """
     return psycopg2.connect(
-        dbname=os.getenv("DB_NAME"),
-        user=os.getenv("DB_USERNAME"),
-        password=os.getenv("DB_USER_PASSWORD"),
-        host=os.getenv("DB_HOST"),
-        port=os.getenv("DB_PORT"),
+        dbname="tunelink",
+        user="aq1970",
+        password="0q1qfscs",
+        host="pgserver.mau.se",
+        port="5432"
     )
 
 
@@ -580,3 +580,13 @@ def get_forum_name_by_id(forum_id):
         cur.execute("SELECT name FROM forums WHERE id = %s", (forum_id,))
         result = cur.fetchone()
         return result[0] if result else None
+
+def db_get_thread_by_id(thread_id):
+    return db.fetchone("SELECT * FROM threads WHERE id = %s", (thread_id,))
+
+
+def db_create_comment(thread_id, user_id, description, spotify_url=None):
+    db.execute(
+        "INSERT INTO t_comments (thread_id, user_id, description, spotify_url) VALUES (%s, %s, %s, %s)",
+        (thread_id, user_id, description, spotify_url)
+    )
