@@ -209,7 +209,7 @@ def handle_forum_selection():
     forum_id = request.form.get('forum_id')
     if not forum_id:
         return render_template("error.html", error="Inget subforum valt.")
-    return redirect(url_for("create_thread", forum_id=forum_id))
+    return redirect(url_for("show_create_thread_form", forum_id=forum_id))
 
 # formulär för att skapa tråd
 @app.route("/create_thread/<int:forum_id>", methods=["GET"])
