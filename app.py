@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 from flask import Flask, redirect, render_template, request, session, url_for, jsonify, flash
 
 from auth import handle_callback, spotify_auth
-from db import create_subforum_in_db, get_subforum_data, update_user_bio,search_subforums_by_name,  subscribe_to_forum, unsubscribe_from_forum, get_user_subscriptions,get_user_profile_db,get_subforum_by_name, get_all_forums, get_forum_name_by_id, create_thread
 import db
+from db import create_subforum_in_db, get_subforum_data, update_user_bio,search_subforums_by_name,  subscribe_to_forum, unsubscribe_from_forum, get_user_subscriptions,get_user_profile_db,get_subforum_by_name, get_all_forums, get_forum_name_by_id, create_thread, get_thread_by_id, get_comments_by_thread
 from spotify import get_user, get_user_profile
 from spotipy import Spotify
 
@@ -281,8 +281,6 @@ def create_thread_from_subforum(forum_id):
 
 @app.route("/thread/<int:thread_id>")
 def show_thread(thread_id):
-    from db import get_thread_by_id, get_comments_by_thread
-
     thread = get_thread_by_id(thread_id)
     if not thread:
         return render_template("error.html", error="Tråden kunde inte hittas.")
