@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+
+  <!-- Visa tråd -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+      <h2 class="card-title text-center">{{ thread.title }}</h2>
+      <p class="text-muted text-center">Postad av användare {{ thread.creator_id }} • {{ thread.updated_at }}</p>
+      <p class="card-text">{{ thread.description }}</p>
+
+      {% if thread.spotify_url %}
+        <div class="text-center mt-3">
+          <iframe src="https://open.spotify.com/embed/track/{{ thread.spotify_url | replace('https://open.spotify.com/track/', '') }}"
+                  width="300" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media">
+          </iframe>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Kommentarer -->
+  <h4>Kommentarer</h4>
+  {% if comments %}
+    <ul class="list-group mb-4">
+      {% for comment in comments %}
+        <li class="list-group-item">
+          <strong>{{ comment.user_name }}</strong> <span class="text-muted">säger:</span><br>
+          {{ comment.description }}
+          {% if comment.spotify_url %}
+            <div class="mt-2">
+              <iframe src="https://open.spotify.com/embed/track/{{ comment.spotify_url | replace('https://open.spotify.com/track/', '') }}"
+                      width="300" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media">
+              </iframe>
+            </div>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Inga kommentarer än. Bli den första att kommentera!</p>
+  {% endif %}
+
+  <!-- Lägg till kommentar -->
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Lägg till en kommentar</h5>
+      <form method="post" action="{{ url_for('submit_comment', thread_id=thread.id) }}">
+        <div class="mb-3">
+          <label for="comment_description" class="form-label">Kommentar</label>
+          <textarea name="description" id="comment_description" class="form-control" rows="3" required></textarea>
+        </div>
+        <div class="mb-3">
+          <label for="spotify_url" class="form-label">Spotify URL (valfritt)</label>
+          <input type="url" name="spotify_url" id="spotify_url" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary">Kommentera</button>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
