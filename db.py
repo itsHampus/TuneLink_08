@@ -21,6 +21,7 @@ def get_connection():
     )
 
 
+
 def get_subforum_by_name(name):
     """Fetches a subforum by its name from the database.
 
