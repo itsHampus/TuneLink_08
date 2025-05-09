@@ -451,6 +451,8 @@ def create_thread_db(forum_id, creator_id, title, spotify_url, description):
                     VALUES (%s, %s, %s, %s, %s)
                 """, (forum_id, creator_id, title, spotify_url, description))
         conn.commit()
+        cur.close()
+        conn.close()
     # if inserting into the database doesn't work, it closes the connection.
     except:
         cur.close()
