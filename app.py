@@ -7,6 +7,9 @@ from flask import Flask, redirect, render_template, request, session, url_for, j
 from auth import handle_callback, spotify_auth
 from db import create_subforum_in_db, get_subforum_data, update_user_bio,search_subforums_by_name,  subscribe_to_forum, unsubscribe_from_forum, get_user_subscriptions,get_user_profile_db,get_subforum_by_name
 
+# setting import on a new line because the one above is too long
+from db import create_thread_db
+
 from spotify import get_user, get_user_profile
 from spotipy import Spotify
 
@@ -179,6 +182,56 @@ def page_not_found(err):
         404,
     )
 
+
+@app.route("/subforum/<name>/create_thread_route", methods=["POST"])
+def create_thread_app(name):
+
+    """ function to create_thread, function name ends with _app to avoid confusion with the function in db.py
+        it gets the values from the modal in subforum.html
+
+        Args
+        -------
+            name : string
+                name of the subforum
+
+        Returns
+        -------
+
+        """
+
+    forum = get_subforum_by_name(name)
+    if forum is None:
+        return redirect(url_for("error"))
+
+    title = request.form.get("title")
+
+    # if title is None or empty string it will cause problems
+    if title == None or "":
+        title = "title placeholder"
+
+    spotify_url = request.form.get("spotify_url")
+
+    # if invalid spotify url is entered the form will give None or empty string and cause problems
+    # so i'm setting it as "placeholder" string instead
+    
+    if spotify_url == None or "":
+        spotify_url = "spotify_url placeholder"
+
+    description = request.form.get("description")
+
+    # if description is None or empty string it will also cause problems
+    if description == None or "":
+        description = "description placeholder"
+
+    creator_id = session.get("user_id")
+
+    # changing it to checking if creator_id is not int type because otherwise it will cause problems
+    if type(creator_id) != int:
+        return redirect(url_for("index"))
+
+    create_thread_db(forum["id"], creator_id, title, spotify_url, description)
+
+    return redirect(url_for("show_subforum", name=name))
 
 
 @app.route("/logout")
