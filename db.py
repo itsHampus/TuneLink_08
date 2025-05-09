@@ -442,10 +442,6 @@ def create_thread_db(forum_id, creator_id, title, spotify_url, description):
         None
     """
 
-    # checking if forum_id is not int type because otherwise it will cause problems
-    if type(forum_id) != int:
-        return None
-
     conn = get_connection()
     cur = conn.cursor()
 
