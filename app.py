@@ -186,7 +186,7 @@ def page_not_found(err):
 @app.route("/subforum/<name>/create_thread_route", methods=["POST"])
 def create_thread_app(name):
 
-    """ function to create_thread, function name ends with _app to avoid confusion with the function in db.py
+    """ function that creates a thread, function name ends with _app to avoid confusion with the function in db.py
         it gets the values from the modal in subforum.html
 
         Args
