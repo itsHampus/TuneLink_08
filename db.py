@@ -417,3 +417,45 @@ def get_subforum_by_name(name):
     finally:
         cur.close()
         conn.close()
+
+
+def create_thread_db(forum_id, creator_id, title, spotify_url, description):
+
+    """ function that creates a thread and inserts it into the database table "threads".
+    function name ends with _db to avoid confusion with the function in app.py
+
+    Args
+    -------
+        forum_id : int
+            ID of the forum.
+        creator_id : int
+            ID of the user creating the thread.
+        title : str
+            Title of the thread.
+        spotify_url : str
+            Spotify URL of the thread.
+        description : str
+            Description to the thread.
+
+    Returns
+    -------
+        None
+    """
+
+    # checking if forum_id is not int type because otherwise it will cause problems
+    if type(forum_id) != int:
+        return None
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+                    INSERT INTO threads (forum_id, creator_id, title, spotify_url, description)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (forum_id, creator_id, title, spotify_url, description))
+        conn.commit()
+    # if inserting into the database doesn't work, it closes the connection.
+    except:
+        cur.close()
+        conn.close()
