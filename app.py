@@ -225,8 +225,11 @@ def create_thread_app(name):
 
     creator_id = session.get("user_id")
 
-    # changing it to checking if creator_id is not int type because otherwise it will cause problems
+    # checking if creator_id and forum id is not int type because otherwise it will cause problems
     if type(creator_id) != int:
+        return redirect(url_for("index"))
+
+    if type(forum["id"]) != int:
         return redirect(url_for("index"))
 
     create_thread_db(forum["id"], creator_id, title, spotify_url, description)
