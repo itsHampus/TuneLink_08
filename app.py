@@ -199,9 +199,15 @@ def create_thread_app(name):
 
         """
 
-    forum = get_subforum_by_name(name)
-    if forum is None:
+    subforum = get_subforum_by_name(name)
+    if subforum is None:
         return redirect(url_for("error"))
+
+    if type(subforum["id"]) != int:
+        return redirect(url_for("index"))
+    else:
+        subforum_id = subforum["id"]
+        
 
     title = request.form.get("title")
 
@@ -225,14 +231,11 @@ def create_thread_app(name):
 
     creator_id = session.get("user_id")
 
-    # checking if creator_id and forum id is not int type because otherwise it will cause problems
+    # checking if creator_id and subforum id is not int type because otherwise it will cause problems
     if type(creator_id) != int:
         return redirect(url_for("index"))
 
-    if type(forum["id"]) != int:
-        return redirect(url_for("index"))
-
-    create_thread_db(forum["id"], creator_id, title, spotify_url, description)
+    create_thread_db(subforum_id, creator_id, title, spotify_url, description)
 
     return redirect(url_for("show_subforum", name=name))
 
