@@ -122,6 +122,7 @@ def get_threads_by_forum(forum_id):
             "created_at": row[7],
             "updated_at": row[8],
         }
+        threads.append(thread)
 
     return threads
 
