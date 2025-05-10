@@ -22,15 +22,16 @@
 
 
 
+  <!-- for loop gets the thread info from show_subforum function in app.py" -->
 {% for thread in threads %}
 <div class="center_wrapper">
-<div class="thread_card card">
-    <p class="card-text"><small class="text-muted">Här är användaren som lagt upp</small></p>
-    <h5 class="text-center card-title">Titel på thread</h5>
+  <div class="thread_card card">
+    <p class="card-text"><small class="text-muted">Postad av:{{ thread.creator_id }}</small></p>
+    <h5 class="text-center card-title">{{ thread.title }}</h5>
     <img class="thread_image card-img-top" src="https://i.scdn.co/image/ab67616d0000b273fe168e1e3b834412cbe77793" alt="Card image cap">
     <div class="card-body">
-      <p class="card-text">Här skrivs beskrivning på tråd</p>
-      <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+      <p class="card-text">{{ thread.description }}</p>
+      <p class="card-text"><small class="text-muted">Spotify-länk: <a href="{{ thread.spotify_url }}">{{ thread.spotify_url }}</a></small></p>
       <div class="d-flex gap-2 mb-3">
         <button type="button" class="btn btn-secondary">
           <i class="bi bi-hand-thumbs-up"></i>
@@ -44,9 +45,6 @@
         <button type="button" class="btn btn-secondary">
           <i class="bi bi-share"></i>
         </button>
-      </div>
-      </button>
-
       </div>
     </div>
   </div>
