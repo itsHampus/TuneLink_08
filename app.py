@@ -201,7 +201,7 @@ def create_thread_app(name):
 
     subforum = get_subforum_by_name(name)
     if subforum is None:
-        return redirect(url_for("error"))
+        return redirect(url_for("error", error="Subforumet existerar inte."))
 
     if type(subforum["id"]) != int:
         return redirect(url_for("index"))
