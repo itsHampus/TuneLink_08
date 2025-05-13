@@ -24,13 +24,22 @@
 
 {% for thread in threads %}
 <div class="center_wrapper">
-<div class="thread_card card">
-    <p class="card-text"><small class="text-muted">Här är användaren som lagt upp</small></p>
-    <h5 class="text-center card-title">Titel på thread</h5>
-    <img class="thread_image card-img-top" src="https://i.scdn.co/image/ab67616d0000b273fe168e1e3b834412cbe77793" alt="Card image cap">
+<div class="thread_card card mb-4">
+    <p class="card-text"><small class="text-muted">{{ thread.username }}</small></p>
+    <h5 class="text-center card-title">{{ thread.title }}</h5>
+
+    <a href="{{ thread.spotify_url }}" target="blank">
+    <img class="thread_image card-img-top"
+    src="{{ thread.image_url }}"
+    alt="Spotify Album Cover">
+    </a>
+
     <div class="card-body">
-      <p class="card-text">Här skrivs beskrivning på tråd</p>
-      <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+      <p class="card-text">{{ thread.description }}</p>
+      <a href="{{ thread.spotify_url }}" target="blank" class="btn btn-success mb-3">
+        <i class="fab fa-spotify me-1"></i>Spela i Spotify
+        </a>
+      <p class="card-text"><small class="text-muted">{{ thread.created_at.strftime("%Y-%m-%d") }}</small></p>
       <div class="d-flex gap-2 mb-3">
         <button type="button" class="btn btn-secondary">
           <i class="bi bi-hand-thumbs-up"></i>
@@ -38,9 +47,9 @@
         <button type="button" class="btn btn-secondary">
           <i class="bi bi-hand-thumbs-down"></i>
         </button>
-        <button type="button" class="btn btn-secondary">
+        <a href="{{ url_for('show_thread', thread_id = thread.id) }}" class="btn btn-secondary">
           <i class="bi bi-chat-dots-fill"></i>
-        </button>
+        </a>
         <button type="button" class="btn btn-secondary">
           <i class="bi bi-share"></i>
         </button>

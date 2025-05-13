@@ -98,10 +98,13 @@ def get_threads_by_forum(forum_id):
     cur = conn.cursor()
     cur.execute(
         """
-        SELECT id, forum_id , creator_id, title, spotify_url, description, is_pinned, created_at, updated_at
+        SELECT threads.id, threads.forum_id, threads.creator_id,threads.title,threads.spotify_url,
+        threads.description, threads.is_pinned, threads.created_at,threads.updated_at,
+        users.username
         FROM threads
-        WHERE forum_id = %s
-        ORDER BY created_at DESC
+        JOIN users ON threads.creator_id = users.id
+        WHERE threads.forum_id = %s
+        ORDER BY threads.created_at DESC
         """,
         (forum_id,),
     )
@@ -121,7 +124,9 @@ def get_threads_by_forum(forum_id):
             "is_pinned": row[6],
             "created_at": row[7],
             "updated_at": row[8],
+            "username": row[9]
         }
+        threads.append(thread)
 
     return threads
 
@@ -286,11 +291,17 @@ def subscribe_to_forum(user_id, forum_id):
         user_id : int
             The ID of the user.
         forum_id : int
-            The ID of the subforum
+            The ID of the subforum.
 
 
     Returns
-    -------"""
+    -------
+        tuple
+            The inserted row containing the users ID and forum ID.
+
+        None
+            if the user already is subscribed.
+    """
     conn = get_connection()
     cur = conn.cursor()
     try:
@@ -379,9 +390,23 @@ def search_subforums_by_name(query):
         cur.close()
         conn.close()
 
-          
+
 
 def get_user_subscriptions(user_id):
+    """
+    Fetches all subforums the user is subscribed to.
+
+    Args
+    -------
+        user_id : int
+            The ID of the user to fetch subscriptions for.
+
+
+    Returns
+    -------
+        dict
+            A list of dictionaries containing the subforum's id (int) and name (str)
+    """
     conn = get_connection()
     cur = conn.cursor()
     try:
@@ -400,7 +425,23 @@ def get_user_subscriptions(user_id):
         conn.close()
 
 def get_subforum_by_name(name):
-    """""fetches a subforum by its name from the database."""
+    """""fetches a subforum by its name from the database.
+
+
+    Args
+    -------
+        name : str
+            The name of the subforum to be fetched.
+
+
+    Returns
+    -------
+        dict
+            a dictionary containing the subforum's id(int) and name (str)
+
+        None
+            if no subforum with the given name exists.
+    """
     conn = get_connection()
     cur = conn.cursor()
     try:
@@ -414,6 +455,84 @@ def get_subforum_by_name(name):
         if row is not None:
             return {"id": row[0], "name": row[1]}
         return None
+    finally:
+        cur.close()
+        conn.close()
+
+def get_thread_by_id(thread_id):
+    """
+    Fetches a thread by its id from the DB
+
+    Args
+    -------
+        thread_id : int
+            The id of the thread.
+
+    Returns
+    -------
+        dict
+            A dict containing the threads id, name and description
+
+        None
+            If the thread does not exist.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            SELECT threads.id , threads.title, threads.description, threads.spotify_url, threads.created_at, users.username
+            FROM threads
+            JOIN users ON threads.creator_id = users.id
+            WHERE threads.id = %s
+            """, (thread_id,))
+        row = cur.fetchone()
+        if row is not None:
+            return{
+                "id": row[0],
+                "title": row[1],
+                "description": row[2],
+                "spotify_url": row[3],
+                "created_at": row[4],
+                "username": row[5]
+            }
+        return None
+    finally:
+        cur.close()
+        conn.close()
+
+def get_comments_for_thread(thread_id):
+    """
+    Fetches all comments for specific thread
+
+    Args
+    -------
+        Thread_id : int
+            The id of the thread were the comments are going to be retrived.
+
+    Returns
+    -------
+        Dict
+            A dict containing the comments description, created_at and username
+
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            SELECT t_comments.description, t_comments.created_at, users.username
+            FROM t_comments
+            JOIN users ON t_comments.user_id = users.id
+            WHERE t_comments.thread_id = %s
+            ORDER BY t_comments.created_at DESC
+                """, (thread_id,))
+        rows = cur.fetchall()
+        return [{
+                "description": row[0],
+                "created_at": row[1],
+                "username": row[2],
+
+                }
+                for row in rows]
     finally:
         cur.close()
         conn.close()
