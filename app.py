@@ -205,8 +205,8 @@ def create_thread_app(name):
 
     if type(subforum["id"]) != int:
         return redirect(url_for("index"))
-    else:
-        subforum_id = subforum["id"]
+    
+    subforum_id = subforum["id"]
         
 
     title = request.form.get("title")
