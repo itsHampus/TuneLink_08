@@ -165,3 +165,29 @@ def get_user(access_token: str):
     user = sp.current_user()
 
     return user
+
+
+
+def get_album_image_url(spotify_url, sp):
+    """Fetches the album image from spotify track URL
+
+    Args
+    -----
+        spotify_url : str
+            The Spotify track URL.
+
+        sp: Spotify
+            Spotipy client object
+
+    Returns
+    ------
+        str
+            Album image URL or if not found Placeholder TuneLink image
+    """
+    try:
+        track_id = spotify_url.split("/")[-1].split("?")[0]
+        track = sp.track(track_id)
+        return track["album"]["images"][0]["url"]
+    except Exception as e:
+        print(f"Error fetching album image: {e}")
+        return "/static/tunelink.png"

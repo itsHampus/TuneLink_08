@@ -5,9 +5,9 @@ from dotenv import load_dotenv
 from flask import Flask, redirect, render_template, request, session, url_for, jsonify, flash
 
 from auth import handle_callback, spotify_auth
-from db import create_subforum_in_db, get_subforum_data, update_user_bio,search_subforums_by_name,  subscribe_to_forum, unsubscribe_from_forum, get_user_subscriptions,get_user_profile_db,get_subforum_by_name
+from db import create_subforum_in_db, get_subforum_data, update_user_bio,search_subforums_by_name,  subscribe_to_forum, unsubscribe_from_forum, get_user_subscriptions,get_user_profile_db,get_subforum_by_name,get_thread_by_id, get_comments_for_thread,get_thread_by_id,get_threads_by_forum
 
-from spotify import get_user, get_user_profile
+from spotify import get_user, get_user_profile, get_album_image_url
 from spotipy import Spotify
 
 load_dotenv()
@@ -54,6 +54,34 @@ def index():
 def callback():
     handle_callback(session)
     return redirect(url_for("profile"))
+
+@app.route("/dashboard")
+def dashboard():
+    token_info = session.get("token_info")
+    user_id = session.get("user_id")
+    if token_info is None or user_id is None:
+        return redirect(url_for("index"))
+
+    sp = Spotify(auth=token_info["access_token"])
+    user = get_user(token_info["access_token"])
+
+    subscribed_forums = get_user_subscriptions(user_id)
+    forum_ids = [forum["id"] for forum in subscribed_forums]
+
+    threads = []
+    for forum in forum_ids:
+        forum_threads = get_threads_by_forum(forum)
+        for thread in forum_threads:
+            spotify_url = thread.get("spotify_url")
+            if spotify_url is not None:
+                thread["image_url"] = get_album_image_url(spotify_url, sp)
+            else:
+                thread["image_url"] = "/static/tunelink.png"
+            threads.append(thread)
+
+    return render_template("dashboard.html",
+                            threads=threads,
+                            user=user)
 
 
 @app.route("/profile")
@@ -112,13 +140,22 @@ def show_subforum(name):
     if subforum_data_dict is None:
         return redirect(url_for("error", error="Subforumet existerar inte."))
 
+    token_info = session.get("token_info")
+    if token_info is None:
+        return redirect(url_for("index"))
+
+    sp = Spotify(auth=token_info["access_token"])
     user = get_user(session["token_info"]["access_token"])
+
+    threads = subforum_data_dict["threads"]
+    for thread in threads:
+        thread["image_url"] = get_album_image_url(thread["spotify_url"], sp)
 
     return render_template(
         "subforum.html",
         name=name,
         forum=subforum_data_dict["subforum"],
-        threads=subforum_data_dict["threads"],
+        threads=threads,
         user=user,
     )
 
@@ -159,6 +196,23 @@ def unsubscribe(name):
         flash("Du prenumererar inte på subforumet!")
     return redirect(url_for("show_subforum", name = subforum["name"]))
 
+@app.route("/thread/<int:thread_id>")
+def show_thread(thread_id):
+    thread = get_thread_by_id(thread_id)
+    if thread is None:
+        return redirect(url_for("error", error="Tråden existerar inte."))
+
+    token_info = session.get("token_info")
+    if token_info is None:
+        return redirect(url_for("index"))
+
+    sp = Spotify(auth=token_info["access_token"])
+    thread["image_url"] = get_album_image_url(thread["spotify_url"], sp)
+
+    comments = get_comments_for_thread(thread_id)
+    return render_template("thread.html",
+                        thread=thread,
+                        comments=comments)
 
 @app.route("/error")
 def error():
