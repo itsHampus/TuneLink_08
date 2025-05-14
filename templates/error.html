@@ -1,0 +1,8 @@
+{% extends 'base.html' %} {% block content %}
+<div>
+    <h1>Ett fel uppstod</h1>
+    <p>{{ error }}</p>
+    <a href="{{ url_for('profile') }}">Gå tillbaka till din profil</a>
+</div>
+
+{% endblock%}
