@@ -213,7 +213,7 @@ def create_thread_app(name):
 
     # if title is None or empty string it will cause problems
     if title == None or "":
-        title = "title placeholder"
+        return redirect(url_for("error"), error="invalid title")
 
     spotify_url = request.form.get("spotify_url")
 
