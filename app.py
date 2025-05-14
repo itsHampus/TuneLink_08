@@ -221,19 +221,19 @@ def create_thread_app(name):
     # so i'm setting it as "placeholder" string instead
     
     if spotify_url == None or "":
-        spotify_url = "spotify_url placeholder"
+        return redirect(url_for("error"), error="invalid spotify url")
 
     description = request.form.get("description")
 
     # if description is None or empty string it will also cause problems
     if description == None or "":
-        description = "description placeholder"
+        return redirect(url_for("error"), error="invalid description")
 
     creator_id = session.get("user_id")
 
     # checking if creator_id and subforum id is not int type because otherwise it will cause problems
     if type(creator_id) != int:
-        return redirect(url_for("index"))
+        return redirect(url_for("index"), error="invalid user_id")
 
     create_thread_db(subforum_id, creator_id, title, spotify_url, description)
 
