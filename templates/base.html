@@ -46,6 +46,13 @@
         </div>
 
         <div class="nav flex-column">
+          <a href="{{ url_for('dashboard') }}" class="sidebar-link text-decoration-none p-3 {% if request.endpoint == 'dashboard' %}active{% endif %}">
+            <i class="bi bi-columns-gap me-3"></i>
+            <span class="hide-on-collapse">Dashboard</span>
+          </a>
+        </div>
+
+        <div class="nav flex-column">
           <a href="#" class="sidebar-link active text-decoration-none p-3" data-bs-toggle="modal" data-bs-target="#start_subforum_modal">
 
             <i class="fas fa-music me-3"></i>

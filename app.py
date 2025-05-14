@@ -220,6 +220,28 @@ def ajax_search_subforums():
     results = search_subforums_by_name(query)
     return jsonify(results)
 
+@app.route("/dashboard")
+def dashboard():
+    user_id = session.get("user_id")
+    if user_id is None:
+        return redirect(url_for("index"))
+
+    # Fetch data for the dashboard
+    user = get_user(session["token_info"]["access_token"])
+    subscribed_forums = get_user_subscriptions(user_id)
+    total_subforums = len(subscribed_forums)
+
+    # Example: Fetch total threads and posts (implement these functions in your database logic)
+    
+    
+
+    return render_template(
+        "dashboard.html",
+        user=user,
+        subscribed_forums=subscribed_forums,
+        total_subforums=total_subforums,
+    
+    )
 
 if __name__ == "__main__":
     app.run(debug=True)

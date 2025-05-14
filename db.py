@@ -417,3 +417,27 @@ def get_subforum_by_name(name):
     finally:
         cur.close()
         conn.close()
+
+
+
+def get_total_threads():
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM threads")
+    result = cur.fetchone()[0]
+    cur.close()
+    conn.close()
+    return result
+
+def get_total_posts():
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM t_comments")
+    result = cur.fetchone()[0]
+    cur.close()
+    conn.close()
+    return result
+
+if __name__ == "__main__":
+    print("Trådar:", get_total_threads())
+    print("Inlägg:", get_total_posts())
