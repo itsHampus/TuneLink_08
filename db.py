@@ -98,7 +98,7 @@ def get_threads_by_forum(forum_id):
     cur = conn.cursor()
     cur.execute(
         """
-        SELECT id, forum_id , creator_id, title, spotify_url, description, is_pinned, created_at, updated_at
+        SELECT id, forum_id , creator_id, title, spotify_url, description, is_pinned, created_at, updated_at, username
         FROM threads
         WHERE forum_id = %s
         ORDER BY created_at DESC
@@ -121,6 +121,7 @@ def get_threads_by_forum(forum_id):
             "is_pinned": row[6],
             "created_at": row[7],
             "updated_at": row[8],
+            "username": row[9],
         }
         threads.append(thread)
 
