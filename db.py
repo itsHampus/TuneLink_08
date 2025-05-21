@@ -290,7 +290,10 @@ def subscribe_to_forum(user_id, forum_id):
 
 
     Returns
-    -------"""
+    -------
+        inserterd : tuple
+            A tuple containing the ID of the inserted subscription.
+    """
     conn = get_connection()
     cur = conn.cursor()
     try:
@@ -300,7 +303,7 @@ def subscribe_to_forum(user_id, forum_id):
             VALUES (%s, %s)
             ON CONFLICT DO NOTHING RETURNING id
             """,
-            (user_id, forum_id)
+            (user_id, forum_id),
         )
         inserted = cur.fetchone()
         conn.commit()
@@ -308,11 +311,10 @@ def subscribe_to_forum(user_id, forum_id):
     finally:
         cur.close()
         conn.close()
-        return None
+
 
 def unsubscribe_from_forum(user_id, forum_id):
-    """
-    Unsubscribes a user from a subforum
+    """Unsubscribes a user from a subforum
 
     Args
     -------
@@ -324,7 +326,8 @@ def unsubscribe_from_forum(user_id, forum_id):
 
     Returns
     -------
-        Inserted
+        inserted : tuple
+            A tuple containing the ID of the deleted subscription.
     """
     conn = get_connection()
     cur = conn.cursor()
@@ -335,7 +338,7 @@ def unsubscribe_from_forum(user_id, forum_id):
             WHERE user_id = %s AND forum_id = %s
             RETURNING id
             """,
-            (user_id, forum_id)
+            (user_id, forum_id),
         )
         deleted = cur.fetchone()
         conn.commit()
@@ -343,12 +346,10 @@ def unsubscribe_from_forum(user_id, forum_id):
     finally:
         cur.close()
         conn.close()
-        return None
 
 
 def search_subforums_by_name(query):
-    """
-    Searches for subforums by its name
+    """Searches for subforums by its name
 
     Args
     ------
@@ -365,13 +366,13 @@ def search_subforums_by_name(query):
     try:
         cur.execute(
             """
-             SELECT id, name, description
+            SELECT id, name, description
             FROM forums
             WHERE LOWER (name) LIKE LOWER (%s)
             ORDER BY name ASC
             LIMIT 10
             """,
-            (f"%{query}%",)
+            (f"%{query}%",),
         )
         rows = cur.fetchall()
         return [{"id": row[0], "name": row[1], "description": row[2]} for row in rows]
@@ -379,9 +380,19 @@ def search_subforums_by_name(query):
         cur.close()
         conn.close()
 
-          
 
 def get_user_subscriptions(user_id):
+    """Fetches all subforums that a user is subscribed to.
+    Args
+    ------
+        user_id : int
+            The ID of the user.
+
+    Returns
+    ------
+        list : [dict]
+            A list of dictionaries containing the subforum IDs and names.
+    """
     conn = get_connection()
     cur = conn.cursor()
     try:
@@ -392,25 +403,42 @@ def get_user_subscriptions(user_id):
             JOIN subforum_subscriptions ON forums.id = subforum_subscriptions.forum_id
             WHERE subforum_subscriptions.user_id = %s
             """,
-            (user_id,))
+            (user_id,),
+        )
         rows = cur.fetchall()
-        return [{"id": row[0], "name": row [1]} for row in rows]
+        return [{"id": row[0], "name": row[1]} for row in rows]
     finally:
         cur.close()
         conn.close()
 
+
 def get_subforum_by_name(name):
-    """""fetches a subforum by its name from the database."""
+    """ ""Fetches a subforum by its name from the database.
+
+    Args
+    ------
+        name : str
+            The name of the subforum.
+    Returns
+    ------
+        dict
+            A dictionary containing the subforum's ID and name.
+        None
+            If the subforum does not exist.
+    """
     conn = get_connection()
     cur = conn.cursor()
     try:
-        cur.execute("""
+        cur.execute(
+            """
             SELECT id, name, description
             FROM forums
             WHERE name = %s
-            """, (name,))
+            """,
+            (name,),
+        )
         row = cur.fetchone()
-        print("DEBUG rows from DB:", row)
+
         if row is not None:
             return {"id": row[0], "name": row[1]}
         return None

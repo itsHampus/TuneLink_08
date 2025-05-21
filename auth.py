@@ -13,11 +13,13 @@ def spotify_auth(session):
 
     Args
     -------
-        session: The Flask session object.
+        session : SessionMixin
+            The Flask session object.
 
     Returns
     -------
-        str: The Spotify authorization URL.
+        auth_manager.get_authorize_url() : str
+            The Spotify authorization URL.
     """
     auth_manager = SpotifyOAuth(
         client_id=os.getenv("SPOTIPY_CLIENT_ID"),
@@ -35,7 +37,8 @@ def handle_callback(session):
 
     Args
     -------
-        session: The Flask session object.
+        session : SessionMixin
+            The Flask session object.
 
     Returns
     -------

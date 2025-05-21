@@ -8,11 +8,11 @@
     </button>
 
     {% if forum["id"] in subscribed_forum_ids %}
-    <form action="{{ url_for('unsubscribe', name=forum["name"]) }}" method="post" class="mb-0">
+    <form action="{{ url_for('unsubscribe', name=forum['name']) }}" method="post" class="mb-0">
       <button type="submit" class="btn btn-danger btn-lg">Avprenumerera</button>
     </form>
     {% else %}
-    <form action="{{ url_for('subscribe', name=forum["name"]) }}" method="post" class="mb-0">
+    <form action="{{ url_for('subscribe', name=forum['name']) }}" method="post" class="mb-0">
       <button type="submit" class="btn btn-success btn-lg">Prenumerera</button>
     </form>
     {% endif %}
