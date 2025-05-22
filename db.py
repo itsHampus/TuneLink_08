@@ -420,30 +420,29 @@ def get_subforum_by_name(name):
 
 
 
-def get_total_threads():
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT COUNT(*) FROM threads")
-    result = cur.fetchone()[0]
-    cur.close()
-    conn.close()
-    return result
 
-def get_total_posts():
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT COUNT(*) FROM t_comments")
-    result = cur.fetchone()[0]
-    cur.close()
-    conn.close()
-    return result
 
 def delete_subforum_from_db(name, user_id):
+    """
+    Deletes a subforum from the database if the user is an admin.
+
+    Args
+    ------
+        name : str
+            The name of the subforum to delete.
+        user_id : int
+            The ID of the user attempting to delete the subforum.
+
+    Returns
+    -------
+        bool
+            True if the subforum was deleted, False otherwise.
+    """
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("SELECT role FROM users WHERE id = %s", (user_id,))
     result = cur.fetchone()
-    if not result or not result[0] != 'admin' :
+    if not result or result[0] != 'admin' :
         cur.close()
         conn.close()
         return False
@@ -456,6 +455,20 @@ def delete_subforum_from_db(name, user_id):
 
 
 def get_user_role(user_id):
+
+    """
+    Fetches the role of a user from the database.
+
+    Args
+    ------
+        user_id : int
+            The ID of the user.
+
+    Returns
+    -------
+        str
+            The role of the user, or None if not found.
+    """
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("SELECT role FROM users WHERE id = %s", (user_id,))
