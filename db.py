@@ -296,11 +296,13 @@ def subscribe_to_forum(user_id, forum_id):
 
     Returns
     -------
+
         tuple
             The inserted row containing the users ID and forum ID.
 
         None
             if the user already is subscribed.
+
     """
     conn = get_connection()
     cur = conn.cursor()
@@ -311,7 +313,7 @@ def subscribe_to_forum(user_id, forum_id):
             VALUES (%s, %s)
             ON CONFLICT DO NOTHING RETURNING id
             """,
-            (user_id, forum_id)
+            (user_id, forum_id),
         )
         inserted = cur.fetchone()
         conn.commit()
@@ -319,11 +321,10 @@ def subscribe_to_forum(user_id, forum_id):
     finally:
         cur.close()
         conn.close()
-        return None
+
 
 def unsubscribe_from_forum(user_id, forum_id):
-    """
-    Unsubscribes a user from a subforum
+    """Unsubscribes a user from a subforum
 
     Args
     -------
@@ -335,7 +336,8 @@ def unsubscribe_from_forum(user_id, forum_id):
 
     Returns
     -------
-        Inserted
+        inserted : tuple
+            A tuple containing the ID of the deleted subscription.
     """
     conn = get_connection()
     cur = conn.cursor()
@@ -346,7 +348,7 @@ def unsubscribe_from_forum(user_id, forum_id):
             WHERE user_id = %s AND forum_id = %s
             RETURNING id
             """,
-            (user_id, forum_id)
+            (user_id, forum_id),
         )
         deleted = cur.fetchone()
         conn.commit()
@@ -354,7 +356,6 @@ def unsubscribe_from_forum(user_id, forum_id):
     finally:
         cur.close()
         conn.close()
-        return None
 
 
 def search_subforums_by_name(query):
@@ -375,13 +376,13 @@ def search_subforums_by_name(query):
     try:
         cur.execute(
             """
-             SELECT id, name, description
+            SELECT id, name, description
             FROM forums
             WHERE LOWER (name) LIKE LOWER (%s)
             ORDER BY name ASC
             LIMIT 10
             """,
-            (f"%{query}%",)
+            (f"%{query}%",),
         )
         rows = cur.fetchall()
         return [{"id": row[0], "name": row[1], "description": row[2]} for row in rows]
@@ -404,6 +405,7 @@ def get_user_subscriptions(user_id):
     -------
         dict
             A list of dictionaries containing the subforum's id (int) and name (str)
+
     """
     conn = get_connection()
     cur = conn.cursor()
@@ -415,14 +417,17 @@ def get_user_subscriptions(user_id):
             JOIN subforum_subscriptions ON forums.id = subforum_subscriptions.forum_id
             WHERE subforum_subscriptions.user_id = %s
             """,
-            (user_id,))
+            (user_id,),
+        )
         rows = cur.fetchall()
-        return [{"id": row[0], "name": row [1]} for row in rows]
+        return [{"id": row[0], "name": row[1]} for row in rows]
     finally:
         cur.close()
         conn.close()
 
+
 def get_subforum_by_name(name):
+
     """""fetches a subforum by its name from the database.
 
 
@@ -439,23 +444,28 @@ def get_subforum_by_name(name):
 
         None
             if no subforum with the given name exists.
+
     """
     conn = get_connection()
     cur = conn.cursor()
     try:
-        cur.execute("""
+        cur.execute(
+            """
             SELECT id, name, description
             FROM forums
             WHERE name = %s
-            """, (name,))
+            """,
+            (name,),
+        )
         row = cur.fetchone()
-        print("DEBUG rows from DB:", row)
+
         if row is not None:
             return {"id": row[0], "name": row[1]}
         return None
     finally:
         cur.close()
         conn.close()
+
 
 def get_thread_by_id(thread_id):
     """Fetches a thread by its id from the DB
@@ -533,3 +543,67 @@ def get_comments_for_thread(thread_id):
     finally:
         cur.close()
         conn.close()
+
+
+
+
+
+def delete_subforum_from_db(name, user_id):
+    """
+    Deletes a subforum from the database if the user is an admin.
+
+    Args
+    ------
+        name : str
+            The name of the subforum to delete.
+        user_id : int
+            The ID of the user attempting to delete the subforum.
+
+    Returns
+    -------
+        bool
+            True if the subforum was deleted, False otherwise.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT role FROM users WHERE id = %s", (user_id,))
+    result = cur.fetchone()
+    if not result or result[0] != 'admin' :
+        cur.close()
+        conn.close()
+        return False
+
+    cur.execute("DELETE FROM forums WHERE name = %s", (name,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return True
+
+
+def get_user_role(user_id):
+
+    """
+    Fetches the role of a user from the database.
+
+    Args
+    ------
+        user_id : int
+            The ID of the user.
+
+    Returns
+    -------
+        str
+            The role of the user, or None if not found.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT role FROM users WHERE id = %s", (user_id,))
+    result = cur.fetchone()
+    cur.close()
+    conn.close()
+    return result[0] if result else None
+
+
+
+
+
