@@ -210,13 +210,13 @@ def create_thread_app(name):
     title = request.form.get("title")
 
     # if title is None or empty string it will cause problems
-    if title == None or "":
-        return redirect(url_for("error"), error="invalid title")
+    if not title:
+        return redirect(url_for("error", error="titel saknas"))
 
     spotify_url = request.form.get("spotify_url")
 
     # if invalid spotify url is entered the form will give None or empty string and cause problems
-    # so i'm setting it as "placeholder" string instead
+    # so error is returned
     
     if spotify_url == None or "":
         return redirect(url_for("error"), error="invalid spotify url")
