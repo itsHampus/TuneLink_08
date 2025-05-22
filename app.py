@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from flask import Flask, redirect, render_template, request, session, url_for, jsonify, flash
 
 from auth import handle_callback, spotify_auth
-from db import create_subforum_in_db, get_subforum_data, update_user_bio,search_subforums_by_name,  subscribe_to_forum, unsubscribe_from_forum, get_user_subscriptions,get_user_profile_db,get_subforum_by_name
+from db import create_subforum_in_db, get_subforum_data, update_user_bio,search_subforums_by_name,  subscribe_to_forum, unsubscribe_from_forum, get_user_subscriptions,get_user_profile_db,get_subforum_by_name, get_thread_by_id, get_comments_by_thread, add_comment_to_thread
 
 from spotify import get_user, get_user_profile
 from spotipy import Spotify
@@ -179,6 +179,34 @@ def page_not_found(err):
         404,
     )
 
+@app.route("/thread/<int:thread_id>")
+def show_thread(thread_id):
+    thread = get_thread_by_id(thread_id)
+    if not thread:
+        return redirect(url_for("error", error="Tråden finns inte."))
+
+    comments = get_comments_by_thread(thread_id)
+    user = get_user(session["token_info"]["access_token"])
+
+    return render_template("threads.html", thread=thread, comments=comments, user=user)
+
+
+@app.route("/thread/<int:thread_id>/comment", methods=["POST"])
+def comment_on_thread(thread_id):
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for("index"))
+
+    description = request.form.get("description")
+    spotify_url = request.form.get("spotify_url")
+
+    if not description:
+        flash("Du måste skriva något.")
+        return redirect(url_for("show_thread", thread_id=thread_id))
+
+    add_comment_to_thread(thread_id, user_id, description, spotify_url)
+    flash("Kommentar tillagd.")
+    return redirect(url_for("show_thread", thread_id=thread_id))
 
 
 @app.route("/logout")

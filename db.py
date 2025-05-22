@@ -2,6 +2,7 @@ import os
 
 import psycopg2
 
+from psycopg2.extras import RealDictCursor
 
 def get_connection():
     """Establishes a connection to the PostgreSQL database.
@@ -122,8 +123,52 @@ def get_threads_by_forum(forum_id):
             "created_at": row[7],
             "updated_at": row[8],
         }
-
+        threads.append(thread)
     return threads
+
+
+
+def get_thread_by_id(thread_id):
+    conn = get_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur.execute("""
+        SELECT t.*, u.username
+        FROM threads t
+        JOIN users u ON t.creator_id = u.id
+        WHERE t.id = %s
+    """, (thread_id,))
+    thread = cur.fetchone()
+    cur.close()
+    conn.close()
+    return thread
+
+
+def get_comments_by_thread(thread_id):
+    conn = get_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur.execute("""
+        SELECT c.*, u.username
+        FROM t_comments c
+        JOIN users u ON c.user_id = u.id
+        WHERE c.thread_id = %s
+        ORDER BY c.created_at ASC
+    """, (thread_id,))
+    comments = cur.fetchall()
+    cur.close()
+    conn.close()
+    return comments
+
+
+def add_comment_to_thread(thread_id, user_id, description, spotify_url=None):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO t_comments (thread_id, user_id, description, spotify_url)
+        VALUES (%s, %s, %s, %s)
+    """, (thread_id, user_id, description, spotify_url))
+    conn.commit()
+    cur.close()
+    conn.close()
 
 
 def get_user_profile_db(user_id):

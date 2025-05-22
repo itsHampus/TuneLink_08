@@ -1,0 +1,32 @@
+<h2>{{ thread.title }}</h2>
+<p><strong>Skapad av:</strong> {{ thread.username }}</p>
+<p>{{ thread.description }}</p>
+{% if thread.spotify_url %}
+    <p><a href="{{ thread.spotify_url }}" target="_blank">Lyssna på Spotify</a></p>
+{% endif %}
+
+<hr>
+
+<h3>Kommentarer</h3>
+{% if comments %}
+    {% for comment in comments %}
+        <div style="margin-bottom: 1em;">
+            <strong>{{ comment.username }}</strong>: {{ comment.description }}
+            {% if comment.spotify_url %}
+                <br><a href="{{ comment.spotify_url }}" target="_blank">Spotify-länk</a>
+            {% endif %}
+            <br><small>{{ comment.created_at }}</small>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>Inga kommentarer ännu.</p>
+{% endif %}
+
+<hr>
+
+<h3>Lägg till en kommentar</h3>
+<form action="{{ url_for('comment_on_thread', thread_id=thread.id) }}" method="POST">
+    <textarea name="description" placeholder="Skriv din kommentar..." required></textarea><br>
+    <input type="url" name="spotify_url" placeholder="Spotify-länk (valfri)"><br>
+    <button type="submit">Kommentera</button>
+</form>
