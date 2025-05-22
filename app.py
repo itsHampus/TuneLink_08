@@ -16,8 +16,11 @@ from spotipy import Spotify
 import db
 from auth import handle_callback, spotify_auth
 
+import db
 
-from spotify import get_user, get_user_profile
+from spotify import get_user, get_user_profile, get_album_image_url,get_dashboard_data
+from spotipy import Spotify
+
 
 load_dotenv()
 
@@ -72,6 +75,18 @@ def index():
 def callback():
     handle_callback(session)
     return redirect(url_for("profile"))
+
+@app.route("/dashboard")
+def dashboard(user_id,token_info):
+
+    if token_info is None or user_id is None:
+        return redirect(url_for("index"))
+
+    user, threads = get_dashboard_data(token_info, user_id)
+
+    return render_template("dashboard.html",
+                            threads=threads,
+                            user=user)
 
 
 @app.route("/profile")
@@ -130,13 +145,22 @@ def show_subforum(name):
     if subforum_data_dict is None:
         return redirect(url_for("error", error="Subforumet existerar inte."))
 
+    token_info = session.get("token_info")
+    if token_info is None:
+        return redirect(url_for("index"))
+
+    sp = Spotify(auth=token_info["access_token"])
     user = get_user(session["token_info"]["access_token"])
+
+    threads = subforum_data_dict["threads"]
+    for thread in threads:
+        thread["image_url"] = get_album_image_url(thread["spotify_url"], sp)
 
     return render_template(
         "subforum.html",
         name=name,
         forum=subforum_data_dict["subforum"],
-        threads=subforum_data_dict["threads"],
+        threads=threads,
         user=user,
     )
 
@@ -152,8 +176,10 @@ def subscribe(name):
         return redirect(url_for("index"))
 
     success = db.subscribe_to_forum(user_id, subforum["id"])
-    if len(success) > 0:
-        flash("Du prenumerar nu på subforumet!")
+
+    if success is True:
+        flash("Du har nu prenumererat på subforumet!")
+
     else:
         flash("Du prenumererar redan på subforumet!")
     return redirect(url_for("show_subforum", name=subforum["name"]))
@@ -161,6 +187,11 @@ def subscribe(name):
 
 @app.route("/unsubscribe/<string:name>", methods=["POST"])
 def unsubscribe(name):
+
+    """
+    Unsubscribes the user from a subforum.
+    Args"""
+
     subforum = db.get_subforum_by_name(name)
     if subforum is None:
         return redirect(url_for("error", error="subforumet existerar inte."))
@@ -170,12 +201,31 @@ def unsubscribe(name):
         return redirect(url_for("index"))
 
     success = db.unsubscribe_from_forum(user_id, subforum["id"])
+
     if len(success) > 0:
+
         flash("Du har avprenumererat från subforumet!")
     else:
         flash("Du prenumererar inte på subforumet!")
     return redirect(url_for("show_subforum", name=subforum["name"]))
 
+@app.route("/thread/<int:thread_id>")
+def show_thread(thread_id):
+    thread = db.get_thread_by_id(thread_id)
+    if thread is None:
+        return redirect(url_for("error", error="Tråden existerar inte."))
+
+    token_info = session.get("token_info")
+    if token_info is None:
+        return redirect(url_for("index"))
+
+    sp = Spotify(auth=token_info["access_token"])
+    thread["image_url"] = get_album_image_url(thread["spotify_url"], sp)
+
+    comments = db.get_comments_for_thread(thread_id)
+    return render_template("thread.html",
+                        thread=thread,
+                        comments=comments)
 
 @app.route("/error")
 def error():
