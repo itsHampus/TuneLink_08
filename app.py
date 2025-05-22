@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from flask import Flask, redirect, render_template, request, session, url_for, jsonify, flash
 
 from auth import handle_callback, spotify_auth
-from db import create_subforum_in_db, get_subforum_data, update_user_bio,search_subforums_by_name,  subscribe_to_forum, unsubscribe_from_forum, get_user_subscriptions,get_user_profile_db,get_subforum_by_name,delete_subforum_from_db
+from db import create_subforum_in_db, get_subforum_data, update_user_bio,search_subforums_by_name,  subscribe_to_forum, unsubscribe_from_forum, get_user_subscriptions,get_user_profile_db,get_subforum_by_name,delete_subforum_from_db, get_user_role
 
 from spotify import get_user, get_user_profile
 from spotipy import Spotify
@@ -24,10 +24,10 @@ def user_injection():
     user = None
     subscribed_forums = []
     subscribed_forum_ids = []
-
+    role = None
     token_info = session.get("token_info")
     user_id = session.get("user_id")
-    print(f"DEBUG user_id from session: {user_id}")
+    
 
     token_info = session.get("token_info")
     if token_info is not None:
@@ -38,11 +38,14 @@ def user_injection():
                 subscribed_forums = get_user_subscriptions(user_id)
                 subscribed_forum_ids = [forum["id"] for forum in subscribed_forums]
 
+                role = get_user_role(user_id)
+
         except Exception as e:
             print(f"Fel vid hämtning av användarinfo: {e}")
     return dict(user=user,
                 subscribed_forums=subscribed_forums,
-                subscribed_forum_ids=subscribed_forum_ids,)
+                subscribed_forum_ids=subscribed_forum_ids,
+                role=role,)
 
 @app.route("/")
 def index():
@@ -234,42 +237,42 @@ def dashboard():
     
     )
 
-@app.context_processor
-def user_injection():
-    user = None
-    subscribed_forums = []
-    subscribed_forum_ids = []
-    role = None
+# @app.context_processor
+# def user_injection():
+#     user = None
+#     subscribed_forums = []
+#     subscribed_forum_ids = []
+#     role = None
 
-    token_info = session.get("token_info")
-    user_id = session.get("user_id")
+#     token_info = session.get("token_info")
+#     user_id = session.get("user_id")
 
-    if token_info is not None:
-        try:
-            sp = Spotify(auth=token_info["access_token"])
-            user = sp.current_user()
-            if user_id is not None:
-                subscribed_forums = get_user_subscriptions(user_id)
+#     if token_info is not None:
+#         try:
+#             sp = Spotify(auth=token_info["access_token"])
+#             user = sp.current_user()
+#             if user_id is not None:
+#                 subscribed_forums = get_user_subscriptions(user_id)
 
-                # Hämta användarroll från databasen
-                conn = get_connection()
-                cur = conn.cursor()
-                cur.execute("SELECT role FROM users WHERE id = %s", (user_id,))
-                result = cur.fetchone()
-                role = result[0] if result else None
-                cur.close()
-                conn.close()
+#                 # Hämta användarroll från databasen
+#                 conn = get_connection()
+#                 cur = conn.cursor()
+#                 cur.execute("SELECT role FROM users WHERE id = %s", (user_id,))
+#                 result = cur.fetchone()
+#                 role = result[0] if result else None
+#                 cur.close()
+#                 conn.close()
 
-                subscribed_forum_ids = [forum["id"] for forum in subscribed_forums]
-        except Exception as e:
-            print(f"Fel vid hämtning av användarinfo: {e}")
+#                 subscribed_forum_ids = [forum["id"] for forum in subscribed_forums]
+#         except Exception as e:
+#             print(f"Fel vid hämtning av användarinfo: {e}")
 
-    return dict(
-        user=user,
-        role=role,
-        subscribed_forums=subscribed_forums,
-        subscribed_forum_ids=subscribed_forum_ids,
-    )
+    # return dict(
+    #     user=user,
+    #     role=role,
+    #     subscribed_forums=subscribed_forums,
+    #     subscribed_forum_ids=subscribed_forum_ids,
+    # )
 
 
 if __name__ == "__main__":
