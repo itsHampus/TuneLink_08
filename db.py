@@ -465,5 +465,6 @@ def create_thread_db(forum_id, creator_id, title, spotify_url, description):
     # if inserting into the database doesn't work, it closes the connection.
     except Exception as e:
         print("det här är felet: " + e)
+    finally:
         cur.close()
         conn.close()
