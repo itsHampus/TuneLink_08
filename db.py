@@ -421,7 +421,7 @@ def get_subforum_by_name(name):
 
 def create_thread_db(forum_id, creator_id, title, spotify_url, description):
 
-    """ function that creates a thread and inserts it into the database table "threads".
+    """Function that creates a thread and inserts it into the database table "threads".
     function name ends with _db to avoid confusion with the function in app.py
 
     Args
@@ -446,10 +446,19 @@ def create_thread_db(forum_id, creator_id, title, spotify_url, description):
     cur = conn.cursor()
 
     try:
-        cur.execute("""
-                    INSERT INTO threads (forum_id, creator_id, title, spotify_url, description)
+        cur.execute(
+            """
+                    INSERT INTO threads (
+                        forum_id,
+                        creator_id,
+                        title, 
+                        spotify_url,
+                        description
+                    )
                     VALUES (%s, %s, %s, %s, %s)
-                """, (forum_id, creator_id, title, spotify_url, description))
+            """,
+            (forum_id, creator_id, title, spotify_url, description)
+        )
         conn.commit()
         cur.close()
         conn.close()
