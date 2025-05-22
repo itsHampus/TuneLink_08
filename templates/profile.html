@@ -5,12 +5,7 @@
   <meta name="description" content="" />
   <meta name="author" content="" />
   <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico" />
-
   <title>TuneLink</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
-  <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/sign-in/" />
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet" />
 </head>
 <div class="container mt-5 text-center">
 
@@ -23,9 +18,12 @@
     <div class="profil_card card-body">
       <h5 class="card-title">{{ user.display_name }}</h5>
       <p class="card-text">
-        Jag kastar stenar i mitt glashus, Jag kastar pil i min kuvös, Och så odlar jag min rädsla, Ja, jag sår ständigt nya frön
+        {{ bio or "Här var det tomt!"}}
       </p>
-      <a href="#" class="btn btn-success">Redigera</a>
+      {% if spotify_url %}
+      <a href="{{ spotify_url }}" class="btn btn-success" target="_blank">Lyssna på Spotify</a>
+      {% endif %}
+      <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#create_bio_modal">Redigera</a>
     </div>
   </div>
 
@@ -36,7 +34,7 @@
   <h4>Genrer du lyssnar på</h4>
   <div class="d-flex justify-content-center flex-wrap mb-4">
     {% for genre in genres %}
-    <span class="badge badge-secondary m-2 px-3 py-2">{{ genre }}</span>
+    <span class="badge bg-dark text-light m-2 px-3 py-2">{{ genre }}</span>
     {% endfor %}
   </div>
 
@@ -50,6 +48,9 @@
             <div class="fw-bold">{{ track.name }}</div>
             {{ track.artist }}
           </div>
+          <a href="{{ track.spotify_url }}" target="_blank" class="btn btn-outline-success btn-sm ms-3">
+            <i class="fab fa-spotify me-1"></i>Spela i Spotify
+          </a>
         </li>
         {% endfor %}
       </ol>
@@ -62,12 +63,42 @@
         <li class="list-group-item d-flex justify-content-between align-items-start">
           <div class="ms-2 me-auto">
             <div class="fw-bold">{{ artist.name }}</div>
-          </div>
+            </div>
+            <a href="{{ artist.spotify_url }}" target="_blank" class="btn btn-outline-success btn-sm ms-3">
+              <i class="fab fa-spotify me-1"></i>Öppna i Spotify
+            </a>
         </li>
         {% endfor %}
       </ol>
     </div>
-  </div>
 
+  <div class="modal fade" id="create_bio_modal" tabindex="-1" aria-labelledby="create_bio" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="start_subforum_label">Uppdatera din Bio</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Stäng"></button>
+        </div>
+  <div class="modal-body">
+    <div class="card mb-4">
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('create_bio') }}">
+          <div class="mb-3">
+            <label for="song" class="form-label">Spotify-URL</label>
+            <input type="text" class="form-control" id="song" name="song" placeholder="Lägg till en låt...">
+          </div>
+          <div class="mb-3">
+            <label for="bio" class="form-label">Beskrivning</label>
+            <textarea class="form-control" id="bio" rows="3" name="bio"placeholder="Beskrivning..."></textarea>
+          </div>
+          <div class="d-flex justify-content-end gap-2">
+            <button type="submit" class="btn btn-primary">Spara Bio</button>
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Avbryt</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
 {% endblock %}
