@@ -16,8 +16,6 @@ from spotipy import Spotify
 import db
 from auth import handle_callback, spotify_auth
 
-from db import create_subforum_in_db, get_subforum_data, update_user_bio,search_subforums_by_name,  subscribe_to_forum, unsubscribe_from_forum, get_user_subscriptions,get_user_profile_db,get_subforum_by_name,delete_subforum_from_db, get_user_role
-
 
 from spotify import get_user, get_user_profile
 
@@ -46,7 +44,7 @@ def user_injection():
                 subscribed_forums = db.get_user_subscriptions(user_id)
                 subscribed_forum_ids = [forum["id"] for forum in subscribed_forums]
 
-                role = get_user_role(user_id)
+                role = db.get_user_role(user_id)
 
         except Exception as e:
             print(f"Fel vid hämtning av användarinfo: {e}")
@@ -207,7 +205,7 @@ def delete_subforum(name):
     if not user_id:
         return redirect(url_for("index"))
 
-    success = delete_subforum_from_db(name, user_id)
+    success = db.delete_subforum_from_db(name, user_id)
     if not success:
         flash("Du har inte rättigheter att ta bort detta subforum.")
     else:
