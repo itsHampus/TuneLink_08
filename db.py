@@ -358,8 +358,7 @@ def unsubscribe_from_forum(user_id, forum_id):
 
 
 def search_subforums_by_name(query):
-    """
-    Searches for subforums by its name
+    """Searches for subforums by its name
 
     Args
     ------
@@ -393,8 +392,7 @@ def search_subforums_by_name(query):
 
 
 def get_user_subscriptions(user_id):
-    """
-    Fetches all subforums the user is subscribed to.
+    """Fetches all subforums the user is subscribed to.
 
     Args
     -------
@@ -460,8 +458,7 @@ def get_subforum_by_name(name):
         conn.close()
 
 def get_thread_by_id(thread_id):
-    """
-    Fetches a thread by its id from the DB
+    """Fetches a thread by its id from the DB
 
     Args
     -------

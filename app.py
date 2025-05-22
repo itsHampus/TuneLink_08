@@ -7,7 +7,7 @@ from flask import Flask, redirect, render_template, request, session, url_for, j
 from auth import handle_callback, spotify_auth
 from db import create_subforum_in_db, get_subforum_data, update_user_bio,search_subforums_by_name,  subscribe_to_forum, unsubscribe_from_forum, get_user_subscriptions,get_user_profile_db,get_subforum_by_name,get_thread_by_id, get_comments_for_thread,get_thread_by_id,get_threads_by_forum
 
-from spotify import get_user, get_user_profile, get_album_image_url
+from spotify import get_user, get_user_profile, get_album_image_url,get_dashboard_data
 from spotipy import Spotify
 
 load_dotenv()
@@ -56,28 +56,12 @@ def callback():
     return redirect(url_for("profile"))
 
 @app.route("/dashboard")
-def dashboard():
-    token_info = session.get("token_info")
-    user_id = session.get("user_id")
+def dashboard(user_id,token_info):
+
     if token_info is None or user_id is None:
         return redirect(url_for("index"))
 
-    sp = Spotify(auth=token_info["access_token"])
-    user = get_user(token_info["access_token"])
-
-    subscribed_forums = get_user_subscriptions(user_id)
-    forum_ids = [forum["id"] for forum in subscribed_forums]
-
-    threads = []
-    for forum in forum_ids:
-        forum_threads = get_threads_by_forum(forum)
-        for thread in forum_threads:
-            spotify_url = thread.get("spotify_url")
-            if spotify_url is not None:
-                thread["image_url"] = get_album_image_url(spotify_url, sp)
-            else:
-                thread["image_url"] = "/static/tunelink.png"
-            threads.append(thread)
+    user, threads = get_dashboard_data(token_info, user_id)
 
     return render_template("dashboard.html",
                             threads=threads,

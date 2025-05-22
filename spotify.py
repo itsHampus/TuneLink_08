@@ -1,6 +1,8 @@
 from spotipy import Spotify
 
-from db import get_user_profile_db
+from db import get_user_profile_db,get_user_subscriptions,get_threads_by_forum
+
+
 
 
 def get_user_profile(access_token: str, user_id: str):
@@ -191,3 +193,23 @@ def get_album_image_url(spotify_url, sp):
     except Exception as e:
         print(f"Error fetching album image: {e}")
         return "/static/tunelink.png"
+
+def get_dashboard_data(token_info, user_id):
+    sp = Spotify(auth=token_info["access_token"])
+    user = get_user(token_info["access_token"])
+
+    subscribed_forums = get_user_subscriptions(user_id)
+    forum_ids = [forum["id"] for forum in subscribed_forums]
+
+    threads = []
+
+    for forum in forum_ids:
+        forum_threads = get_threads_by_forum(forum)
+        for thread in forum_threads:
+            spotify_url = thread.get("spotify_url")
+            if spotify_url is not None:
+                thread["image_url"] = get_album_image_url(spotify_url, sp)
+            else:
+                thread["image_url"] = "/static/tunelink.png"
+            threads.append(thread)
+    return user, threads
