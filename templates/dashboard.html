@@ -2,42 +2,53 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h1 class="text-center">Dashboard</h1>
-    <div class="row mt-4">
-        <div class="col-md-4">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title">Prenumererade Subforum</h5>
-                    <p class="card-text">{{ total_subforums }}</p>
+    <h1 class="text-center mb-4">Dashboard</h1>
+
+    <!-- Threads Section -->
+    <div class="threads-list">
+        {% for thread in threads %}
+        <div class="card mb-3">
+            <div class="card-body d-flex">
+                <!-- Upvote/Downvote Section -->
+                <div class="vote-section text-center me-3">
+                    <button class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-up"></i>
+                    </button>
+                    <p class="mb-0">{{ thread.votes }}</p>
+                    <button class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-down"></i>
+                    </button>
+                </div>
+
+                <!-- Thread Content -->
+                <div class="thread-content">
+                    <h5 class="card-title mb-1">
+                        <a href="{{ url_for('show_thread', thread_id=thread.id) }}" class="text-decoration-none">
+                            {{ thread.title }}
+                        </a>
+                    </h5>
+                    <p class="card-text text-muted mb-2">{{ thread.description }}</p>
+                    <small class="text-muted">
+                        Created by <strong>{{ thread.creator_name }}</strong> on {{ thread.created_at }}
+                    </small>
+                </div>
+
+                <!-- Comments Count -->
+                <div class="ms-auto text-end">
+                    <p class="mb-0 text-muted">
+                        <i class="bi bi-chat-dots"></i> {{ thread.comments_count }} comments
+                    </p>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title">Trådar</h5>
-                    <p class="card-text">{{ total_threads }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title">Poster</h5>
-                    <p class="card-text">{{ total_posts }}</p>
-                </div>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 
-    <div class="mt-5">
-        <h3>Subscribed Subforums</h3>
-        <ul class="list-group">
-            {% for subforum in subscribed_subforums %}
-                <li class="list-group-item">{{ subforum.name }}</li>
-            {% endfor %}
-        </ul>
+    <!-- No Threads Message -->
+    {% if threads|length == 0 %}
+    <div class="alert alert-info text-center mt-4">
+        No threads available. Start by creating one!
     </div>
-
+    {% endif %}
 </div>
 {% endblock %}

@@ -438,6 +438,23 @@ def get_total_posts():
     conn.close()
     return result
 
-if __name__ == "__main__":
-    print("Trådar:", get_total_threads())
-    print("Inlägg:", get_total_posts())
+def delete_subforum_from_db(name, user_id):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT role FROM users WHERE id = %s", (user_id,))
+    result = cur.fetchone()
+    if not result or not result[0] != 'admin' :
+        cur.close()
+        conn.close()
+        return False
+
+    cur.execute("DELETE FROM forums WHERE name = %s", (name,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return True
+
+
+
+
+

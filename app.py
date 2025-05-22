@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from flask import Flask, redirect, render_template, request, session, url_for, jsonify, flash
 
 from auth import handle_callback, spotify_auth
-from db import create_subforum_in_db, get_subforum_data, update_user_bio,search_subforums_by_name,  subscribe_to_forum, unsubscribe_from_forum, get_user_subscriptions,get_user_profile_db,get_subforum_by_name
+from db import create_subforum_in_db, get_subforum_data, update_user_bio,search_subforums_by_name,  subscribe_to_forum, unsubscribe_from_forum, get_user_subscriptions,get_user_profile_db,get_subforum_by_name,delete_subforum_from_db
 
 from spotify import get_user, get_user_profile
 from spotipy import Spotify
@@ -183,27 +183,18 @@ def page_not_found(err):
 
 @app.route("/delete_subforum/<name>", methods=["POST"])
 def delete_subforum(name):
-   
     user_id = session.get("user_id")
     if not user_id:
         return redirect(url_for("index"))
 
-    
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT is_admin FROM users WHERE id = %s", (user_id,))
-    result = cur.fetchone()
-    if not result or not result[0]: 
-        cur.close()
-        conn.close()
-        return redirect(url_for("profile"))
+    success = delete_subforum_from_db(name, user_id)
+    if not success:
+        flash("Du har inte rättigheter att ta bort detta subforum.")
+    else:
+        flash("Subforumet har tagits bort.")
+    return redirect(url_for("profile"))
 
     
-    cur.execute("DELETE FROM forums WHERE name = %s", (name,))
-    conn.commit()
-    cur.close()
-    conn.close()
-    return redirect(url_for("profile"))
 
 
 @app.route("/logout")
@@ -242,6 +233,44 @@ def dashboard():
         total_subforums=total_subforums,
     
     )
+
+@app.context_processor
+def user_injection():
+    user = None
+    subscribed_forums = []
+    subscribed_forum_ids = []
+    role = None
+
+    token_info = session.get("token_info")
+    user_id = session.get("user_id")
+
+    if token_info is not None:
+        try:
+            sp = Spotify(auth=token_info["access_token"])
+            user = sp.current_user()
+            if user_id is not None:
+                subscribed_forums = get_user_subscriptions(user_id)
+
+                # Hämta användarroll från databasen
+                conn = get_connection()
+                cur = conn.cursor()
+                cur.execute("SELECT role FROM users WHERE id = %s", (user_id,))
+                result = cur.fetchone()
+                role = result[0] if result else None
+                cur.close()
+                conn.close()
+
+                subscribed_forum_ids = [forum["id"] for forum in subscribed_forums]
+        except Exception as e:
+            print(f"Fel vid hämtning av användarinfo: {e}")
+
+    return dict(
+        user=user,
+        role=role,
+        subscribed_forums=subscribed_forums,
+        subscribed_forum_ids=subscribed_forum_ids,
+    )
+
 
 if __name__ == "__main__":
     app.run(debug=True)
