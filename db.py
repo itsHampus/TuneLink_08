@@ -445,3 +445,66 @@ def get_subforum_by_name(name):
     finally:
         cur.close()
         conn.close()
+
+
+
+
+
+def delete_subforum_from_db(name, user_id):
+    """
+    Deletes a subforum from the database if the user is an admin.
+
+    Args
+    ------
+        name : str
+            The name of the subforum to delete.
+        user_id : int
+            The ID of the user attempting to delete the subforum.
+
+    Returns
+    -------
+        bool
+            True if the subforum was deleted, False otherwise.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT role FROM users WHERE id = %s", (user_id,))
+    result = cur.fetchone()
+    if not result or result[0] != 'admin' :
+        cur.close()
+        conn.close()
+        return False
+
+    cur.execute("DELETE FROM forums WHERE name = %s", (name,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return True
+
+
+def get_user_role(user_id):
+
+    """
+    Fetches the role of a user from the database.
+
+    Args
+    ------
+        user_id : int
+            The ID of the user.
+
+    Returns
+    -------
+        str
+            The role of the user, or None if not found.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT role FROM users WHERE id = %s", (user_id,))
+    result = cur.fetchone()
+    cur.close()
+    conn.close()
+    return result[0] if result else None
+
+
+
+

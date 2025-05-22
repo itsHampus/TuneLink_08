@@ -15,6 +15,8 @@ from spotipy import Spotify
 
 import db
 from auth import handle_callback, spotify_auth
+
+
 from spotify import get_user, get_user_profile
 
 load_dotenv()
@@ -29,10 +31,10 @@ def user_injection():
     user = None
     subscribed_forums = []
     subscribed_forum_ids = []
-
+    role = None
     token_info = session.get("token_info")
     user_id = session.get("user_id")
-    print(f"DEBUG user_id from session: {user_id}")
+    
 
     if token_info is not None:
         try:
@@ -42,13 +44,22 @@ def user_injection():
                 subscribed_forums = db.get_user_subscriptions(user_id)
                 subscribed_forum_ids = [forum["id"] for forum in subscribed_forums]
 
+                role = db.get_user_role(user_id)
+
         except Exception as e:
             print(f"Fel vid hämtning av användarinfo: {e}")
+
+    return dict(user=user,
+                subscribed_forums=subscribed_forums,
+                subscribed_forum_ids=subscribed_forum_ids,
+                role=role,)
+
     return dict(
         user=user,
         subscribed_forums=subscribed_forums,
         subscribed_forum_ids=subscribed_forum_ids,
     )
+
 
 
 @app.route("/")
@@ -186,6 +197,25 @@ def page_not_found(err):
     )
 
 
+
+
+@app.route("/delete_subforum/<name>", methods=["POST"])
+def delete_subforum(name):
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for("index"))
+
+    success = db.delete_subforum_from_db(name, user_id)
+    if not success:
+        flash("Du har inte rättigheter att ta bort detta subforum.")
+    else:
+        flash("Subforumet har tagits bort.")
+    return redirect(url_for("profile"))
+
+    
+
+
+
 @app.route("/logout")
 def logout():
     session.clear()
@@ -200,6 +230,7 @@ def ajax_search_subforums():
 
     results = db.search_subforums_by_name(query)
     return jsonify(results)
+
 
 
 if __name__ == "__main__":
