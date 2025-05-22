@@ -26,7 +26,11 @@
       </div>
 
         <div class="d-flex align-items-center">
+          {% if user.images and user.images|length > 0 %}
           <img src="{{ user.images[0].url }}" alt="Profile Image" class="small-profile" alt="Profile">
+          {% else %}
+          <img src="{{ url_for('static', filename='default-profile.png') }}" alt="Default Profile Image" class="small-profile" alt="Profile">
+          {% endif %}
           <div class="ms-3 profile-info">
             <h6 class="text-white mb-0">
               <a href="{{ url_for('profile')}}" class="text-white text-decoration-none">{{ user.display_name }}</a>
