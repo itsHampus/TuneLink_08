@@ -82,8 +82,8 @@
               <!-- connecting form to create_thread funktionen in app.py -->
                 <form method="POST" action="{{ url_for('create_thread_app', name=forum['name']) }}">
                 <div class="mb-3">
-                   <label for="thread_title" class="form-label">Titel</label>
-                  <input type="text" class="form-control" id="thread_title" name="title" placeholder="Ange en titel...">
+                  <label for="thread_title" class="form-label">Titel</label>
+                  <input type="text" class="form-control" id="thread_title" name="title" placeholder="Ange en titel..." required>
 
                 </div>
                 <div class="mb-3">
