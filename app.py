@@ -28,6 +28,7 @@ app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET")
 
 
+
 @app.context_processor
 def user_injection():
     """Injects the user into the template context."""
@@ -223,9 +224,35 @@ def show_thread(thread_id):
     thread["image_url"] = get_album_image_url(thread["spotify_url"], sp)
 
     comments = db.get_comments_for_thread(thread_id)
-    return render_template("thread.html",
-                        thread=thread,
-                        comments=comments)
+
+    # 💡 Lägg till image_url för varje kommentar om de har en Spotify-länk
+    for comment in comments:
+        spotify_url = comment.get("spotify_url")
+        if spotify_url:
+            comment["image_url"] = get_album_image_url(spotify_url, sp)
+        else:
+            comment["image_url"] = "/static/tunelink.png"
+
+    return render_template("thread.html", thread=thread, comments=comments)
+
+
+# @app.route("/thread/<int:thread_id>")
+# def show_thread(thread_id):
+#     thread = db.get_thread_by_id(thread_id)
+#     if thread is None:
+#         return redirect(url_for("error", error="Tråden existerar inte."))
+
+#     token_info = session.get("token_info")
+#     if token_info is None:
+#         return redirect(url_for("index"))
+
+#     sp = Spotify(auth=token_info["access_token"])
+#     thread["image_url"] = get_album_image_url(thread["spotify_url"], sp)
+
+#     comments = db.get_comments_for_thread(thread_id)
+#     return render_template("thread.html",
+#                         thread=thread,
+#                         comments=comments)
 
 @app.route("/error")
 def error():
@@ -262,7 +289,25 @@ def delete_subforum(name):
         flash("Subforumet har tagits bort.")
     return redirect(url_for("profile"))
 
-    
+@app.route("/thread/<int:thread_id>/comment", methods=["POST"])
+def comment_on_thread(thread_id):
+   user_id = session.get("user_id")
+   if not user_id:
+       return redirect(url_for("index"))
+
+
+   description = request.form.get("description")
+   spotify_url = request.form.get("spotify_url")
+
+
+   if not description:
+       flash("Du måste skriva något.")
+       return redirect(url_for("show_thread", thread_id=thread_id))
+   
+   comments = db.add_comment_to_thread(thread_id, user_id, description, spotify_url)
+   flash("Kommentar tillagd.")
+   return redirect(url_for("show_thread", comments=comments, thread_id=thread_id))
+   
 
 
 

@@ -170,29 +170,66 @@ def get_user(access_token: str):
 
 
 
+# def get_album_image_url(spotify_url, sp):
+#     """Fetches the album image from spotify track URL
+
+#     Args
+#     -----
+#         spotify_url : str
+#             The Spotify track URL.
+
+#         sp: Spotify
+#             Spotipy client object
+
+#     Returns
+#     ------
+#         str
+#             Album image URL or if not found Placeholder TuneLink image
+#     """
+#     try:
+#         track_id = spotify_url.split("/")[-1].split("?")[0]
+#         track = sp.track(track_id)
+#         return track["album"]["images"][0]["url"]
+#     except Exception as e:
+#         print(f"Error fetching album image: {e}")
+#         return "/static/tunelink.png"
+
 def get_album_image_url(spotify_url, sp):
-    """Fetches the album image from spotify track URL
+    """
+    Fetches the album image from a Spotify track or album URL.
 
     Args
     -----
         spotify_url : str
-            The Spotify track URL.
-
+            The Spotify URL (track or album).
         sp: Spotify
-            Spotipy client object
+            Spotipy client object.
 
     Returns
     ------
         str
-            Album image URL or if not found Placeholder TuneLink image
+            Album image URL or placeholder if not found.
     """
     try:
-        track_id = spotify_url.split("/")[-1].split("?")[0]
-        track = sp.track(track_id)
-        return track["album"]["images"][0]["url"]
+        print(f"DEBUG - Spotify URL received: {spotify_url}")
+        parts = spotify_url.split("/")
+        if "track" in parts:
+            track_id = parts[-1].split("?")[0]
+            print(f"DEBUG - Detected track ID: {track_id}")
+            track = sp.track(track_id)
+            return track["album"]["images"][0]["url"]
+        elif "album" in parts:
+            album_id = parts[-1].split("?")[0]
+            print(f"DEBUG - Detected album ID: {album_id}")
+            album = sp.album(album_id)
+            return album["images"][0]["url"]
+        else:
+            print("DEBUG - URL is not a track or album.")
+            return "/static/tunelink.png"
     except Exception as e:
         print(f"Error fetching album image: {e}")
         return "/static/tunelink.png"
+
 
 def get_dashboard_data(token_info, user_id):
     sp = Spotify(auth=token_info["access_token"])

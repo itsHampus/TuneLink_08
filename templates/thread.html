@@ -16,10 +16,26 @@
     <div class="mb-3 p-2 border rounded">
         <p class="mb-1"><strong>{{ comment.username }}</strong></p>
         <p>{{ comment.description }}</p>
+
+        {% if comment.image_url %}
+    <div class="mb-2">
+        <img src="{{ comment.image_url }}" width="100" alt="Spotify-bild">
+    </div>
+{% endif %}
+        
         <small class="text-muted">{{ comment.created_at.strftime("%Y-%m-%d") }}</small>
     </div>
 {% else %}
 <p class="text-muted">Inga kommentarer än.</p>
 {% endfor %}
+
+<h3>Lägg till en kommentar</h3>
+<form action="{{ url_for('comment_on_thread', thread_id=thread.id) }}" method="POST">
+    <textarea name="description" placeholder="Skriv din kommentar..." required></textarea><br>
+    <input type="url" name="spotify_url" placeholder="Spotify-länk (valfri)"><br>
+    <button type="submit">Kommentera</button>
+</form>
+
+
 
 {% endblock %}

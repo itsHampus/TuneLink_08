@@ -508,41 +508,27 @@ def get_thread_by_id(thread_id):
         conn.close()
 
 def get_comments_for_thread(thread_id):
-    """
-    Fetches all comments for specific thread
-
-    Args
-    -------
-        Thread_id : int
-            The id of the thread were the comments are going to be retrived.
-
-    Returns
-    -------
-        Dict
-            A dict containing the comments description, created_at and username
-
-    """
     conn = get_connection()
     cur = conn.cursor()
     try:
         cur.execute("""
-            SELECT t_comments.description, t_comments.created_at, users.username
+            SELECT t_comments.description, t_comments.created_at, users.username, t_comments.spotify_url
             FROM t_comments
             JOIN users ON t_comments.user_id = users.id
             WHERE t_comments.thread_id = %s
             ORDER BY t_comments.created_at DESC
-                """, (thread_id,))
+        """, (thread_id,))
         rows = cur.fetchall()
         return [{
-                "description": row[0],
-                "created_at": row[1],
-                "username": row[2],
-
-                }
-                for row in rows]
+            "description": row[0],
+            "created_at": row[1],
+            "username": row[2],
+            "spotify_url": row[3]  
+        } for row in rows]
     finally:
         cur.close()
         conn.close()
+
 
 
 
@@ -604,6 +590,16 @@ def get_user_role(user_id):
     return result[0] if result else None
 
 
+def add_comment_to_thread(thread_id, user_id, description, spotify_url=None):
+   conn = get_connection()
+   cur = conn.cursor()
+   cur.execute("""
+       INSERT INTO t_comments (thread_id, user_id, description, spotify_url)
+       VALUES (%s, %s, %s, %s)
+   """, (thread_id, user_id, description, spotify_url))
+   conn.commit()
+   cur.close()
+   conn.close()
 
 
 
