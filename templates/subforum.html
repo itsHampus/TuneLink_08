@@ -30,18 +30,19 @@
   </div>
 
 
-
-
-
+  <!-- for loop gets the thread info from show_subforum function in app.py" -->
 {% for thread in threads %}
 <div class="center_wrapper">
-<div class="thread_card card">
-    <p class="card-text"><small class="text-muted">Här är användaren som lagt upp</small></p>
-    <h5 class="text-center card-title">Titel på thread</h5>
+  <div class="thread_card card">
+    <p class="card-text"><small class="text-muted">Postad av användare {{ thread.username }}</small></p>
+    <h5 class="text-center card-title">{{ thread.title }}</h5>
     <img class="thread_image card-img-top" src="https://i.scdn.co/image/ab67616d0000b273fe168e1e3b834412cbe77793" alt="Card image cap">
     <div class="card-body">
-      <p class="card-text">Här skrivs beskrivning på tråd</p>
-      <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+      <p class="card-text">{{ thread.description }}</p>
+      <p class="card-text">
+      <small class="text-muted">Skapad: {{ thread.created_at }}</small>
+      </p>
+      <p class="card-text"><small class="text-muted"><a href="{{ thread.spotify_url }}" >Spotify-länk</a></small></p>
       <div class="d-flex gap-2 mb-3">
         <button type="button" class="btn btn-secondary">
           <i class="bi bi-hand-thumbs-up"></i>
@@ -55,9 +56,6 @@
         <button type="button" class="btn btn-secondary">
           <i class="bi bi-share"></i>
         </button>
-      </div>
-      </button>
-
       </div>
     </div>
   </div>
@@ -77,33 +75,38 @@
     </div>
 </div>
 
+
 <div class="modal fade" id="start_thread_modal" tabindex="-1" aria-labelledby="start_thread_modal_label" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
 
         <div class="modal-header">
-          <h5 class="modal-title" id="start_thread_modal_label">Starta En Ny Thread</h5>
+          <!--ändra "Thread" till "Inlägg" som det heter i kravdokumentet?" -->
+          <h5 class="modal-title" id="start_thread_modal_label">Starta Ett Nytt Inlägg</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Stäng"></button>
         </div>
 
         <div class="modal-body">
           <div class="card mb-4">
             <div class="card-body">
-              <form>
+              <!-- connecting form to create_thread funktionen in app.py -->
+                <form method="POST" action="{{ url_for('create_thread_app', name=forum['name']) }}">
                 <div class="mb-3">
-                  <label for="thread_title" class="form-label">Titel</label>
-                  <input type="text" class="form-control" id="thread_title" placeholder="Ange en titel...">
+                    <label for="thread_title" class="form-label">Titel</label>
+                    <input type="text" class="form-control" id="thread_title" name="title" placeholder="Ange en titel..." required>
+
                 </div>
                 <div class="mb-3">
                   <label for="spotify_url" class="form-label">Spotify URL</label>
-                  <input type="text" class="form-control" id="spotify_url" placeholder="Ange en Spotify URL...">
+                  <input type="text" class="form-control" id="spotify_url" name="spotify_url" placeholder="Ange en Spotify URL..." required>
                 </div>
                 <div class="mb-3">
-                  <label for="thread_description" class="form-label">Comment</label>
-                  <textarea class="form-control" id="thread_description" rows="3" placeholder="Beskrivning..."></textarea>
+                  <label for="thread_description" class="form-label">Beskrivning</label>
+                  <textarea class="form-control" id="thread_description" name="description" rows="3" placeholder="Beskrivning..." required></textarea>
                 </div>
                 <div class="d-flex justify-content-end gap-2">
-                  <button type="submit" class="btn btn-primary">Posta Thread</button>
+                  <!--ändra "Thread" till "Inlägg" som det heter i kravdokumentet?" -->
+                  <button type="submit" class="btn btn-primary">Posta Inlägg</button>
                   <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Avbryt</button>
                 </div>
               </form>
@@ -114,6 +117,7 @@
       </div>
     </div>
   </div>
+
 
 
 {% endblock %}
