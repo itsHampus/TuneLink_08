@@ -1,4 +1,5 @@
 import os
+from logging import exception
 
 import psycopg2
 
@@ -13,12 +14,46 @@ def get_connection():
 
     """
     return psycopg2.connect(
-        dbname=os.getenv("DB_NAME"),
-        user=os.getenv("DB_USERNAME"),
-        password=os.getenv("DB_USER_PASSWORD"),
-        host=os.getenv("DB_HOST"),
-        port=os.getenv("DB_PORT"),
+        dbname="tunelink",
+        user="aq1970",
+        password="0q1qfscs",
+        host="pgserver.mau.se",
+        port="5432"
     )
+
+
+def get_subforum_by_name(name):
+    """Fetches a subforum by its name from the database.
+
+    Args
+    -------
+        name : str
+            The name of the subforum.
+
+    Returns
+    -------
+        dict
+            A dictionary containing the subforum's ID, name and description
+        None
+            If the subforum does not exist.
+
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id, name, description FROM forums WHERE name = %s", (name,))
+    forum = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    if forum is not None:
+        forum_id, forum_name, *optional_description = forum
+
+        description = optional_description[0] if len(optional_description) > 0 else None
+
+        return {"id": forum_id, "name": forum_name, "description": description}
+    else:
+        return None
+
 
 
 def get_subforum_by_name(name):
@@ -94,20 +129,36 @@ def get_threads_by_forum(forum_id):
         list
             A list of dictionaries, each containing the thread's information.
     """
+
     conn = get_connection()
-    cur = conn.cursor()
-    cur.execute(
-        """
-        SELECT id, forum_id , creator_id, title, spotify_url, description, is_pinned, created_at, updated_at
-        FROM threads
-        WHERE forum_id = %s
-        ORDER BY created_at DESC
-        """,
-        (forum_id,),
-    )
-    rows = cur.fetchall()
-    cur.close()
-    conn.close()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            SELECT
+                threads.id,
+                threads.forum_id,
+                threads.creator_id, 
+                threads.title,
+                threads.spotify_url, 
+                threads.description, 
+                threads.is_pinned,
+                threads.created_at, 
+                threads.updated_at, 
+                users.username
+            FROM threads
+            JOIN users ON threads.creator_id = users.id
+            WHERE threads.forum_id = %s
+            ORDER BY threads.created_at DESC
+            """,
+            (forum_id,),
+        )
+    except Exception as e:
+        print("det här är felet: " + str(e))
+    finally:
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
 
     threads = []
     for row in rows:
@@ -121,7 +172,9 @@ def get_threads_by_forum(forum_id):
             "is_pinned": row[6],
             "created_at": row[7],
             "updated_at": row[8],
+            "username": row[9],
         }
+        threads.append(thread)
 
     return threads
 
@@ -173,7 +226,7 @@ def controll_user_login(spotify_id, display_name):
     cur.execute("SELECT id FROM users WHERE spotify_id = %s", (spotify_id,))
     user_id = cur.fetchone()
 
-    if len(user_id) == 0:
+    if (user_id) == 0:
         cur.execute(
             "INSERT INTO users(spotify_id, username) VALUES (%s, %s) RETURNING id;",
             (spotify_id, display_name),
@@ -480,6 +533,57 @@ def delete_subforum_from_db(name, user_id):
     cur.close()
     conn.close()
     return True
+
+
+def create_thread_db(forum_id, creator_id, title, spotify_url, description):
+
+    """Function that creates a thread and inserts it into the database table "threads".
+    function name ends with _db to avoid confusion with the function in app.py
+
+    Args
+    -------
+        forum_id : int
+            ID of the forum.
+        creator_id : int
+            ID of the user creating the thread.
+        title : str
+            Title of the thread.
+        spotify_url : str
+            Spotify URL of the thread.
+        description : str
+            Description to the thread.
+
+    Returns
+    -------
+        None
+    """
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    try:
+        cur.execute(
+            """
+                    INSERT INTO threads (
+                        forum_id,
+                        creator_id,
+                        title, 
+                        spotify_url,
+                        description
+                    )
+                    VALUES (%s, %s, %s, %s, %s)
+            """,
+            (forum_id, creator_id, title, spotify_url, description)
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+    # if inserting into the database doesn't work, it closes the connection.
+    except Exception as e:
+        print("det här är felet: " + str(e))
+    finally:
+        cur.close()
+        conn.close()
 
 
 def get_user_role(user_id):

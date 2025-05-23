@@ -212,8 +212,57 @@ def delete_subforum(name):
         flash("Subforumet har tagits bort.")
     return redirect(url_for("profile"))
 
-    
 
+@app.route("/subforum/<name>/create_thread_route", methods=["POST"])
+def create_thread_app(name):
+    """ function that creates a thread, function name ends with _app to avoid confusion with the function in db.py
+        it gets the values from the modal in subforum.html
+
+        Args
+        -------
+            name : string
+                name of the subforum
+
+        Returns
+        -------
+
+        """
+
+    subforum = db.get_subforum_by_name(name)
+    if subforum is None:
+        return redirect(url_for("error", error="Subforumet existerar inte."))
+
+    subforum_id = subforum["id"]
+
+    title = request.form.get("title")
+
+    # if title is None or empty string it will cause problems
+    if not title:
+        return redirect(url_for("error", error="titel saknas"))
+
+    spotify_url = request.form.get("spotify_url")
+
+    # if invalid spotify url is entered the form will give None or empty string and cause problems
+    # so error is returned
+
+    if not spotify_url:
+        return redirect(url_for("error"), error="ogiltlig spotify url")
+
+    description = request.form.get("description")
+
+    # if description is None or empty string it will also cause problems
+    if not description:
+        return redirect(url_for("error"), error="ogiltlig description")
+
+    creator_id = session.get("user_id")
+
+    # checking if creator_id and subforum id is not int type because otherwise it will cause problems
+    if not creator_id:
+        return redirect(url_for("index"), error="ogiltlig användare")
+
+    db.create_thread_db(subforum_id, creator_id, title, spotify_url, description)
+
+    return redirect(url_for("show_subforum", name=name))
 
 
 @app.route("/logout")
