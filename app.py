@@ -10,13 +10,13 @@ from flask import (
     request,
     session,
     url_for,
+    get_flashed_messages
 )
 from spotipy import Spotify
 
 import db
 from auth import handle_callback, spotify_auth
 
-import db
 
 from spotify import get_user, get_user_profile, get_album_image_url,get_dashboard_data
 from spotipy import Spotify
@@ -37,7 +37,7 @@ def user_injection():
     role = None
     token_info = session.get("token_info")
     user_id = session.get("user_id")
-    
+
 
     if token_info is not None:
         try:
@@ -77,8 +77,9 @@ def callback():
     return redirect(url_for("profile"))
 
 @app.route("/dashboard")
-def dashboard(user_id,token_info):
-
+def dashboard():
+    user_id = session.get("user_id")
+    token_info = session.get("token_info")
     if token_info is None or user_id is None:
         return redirect(url_for("index"))
 
@@ -177,20 +178,16 @@ def subscribe(name):
 
     success = db.subscribe_to_forum(user_id, subforum["id"])
 
-    if success is True:
-        flash("Du har nu prenumererat på subforumet!")
+    if success:
+        flash("Du har nu prenumererat på subforumet!","success")
 
     else:
-        flash("Du prenumererar redan på subforumet!")
+        flash("Du prenumererar nu på subforumet!", "success")
     return redirect(url_for("show_subforum", name=subforum["name"]))
 
 
 @app.route("/unsubscribe/<string:name>", methods=["POST"])
 def unsubscribe(name):
-
-    """
-    Unsubscribes the user from a subforum.
-    Args"""
 
     subforum = db.get_subforum_by_name(name)
     if subforum is None:
@@ -200,13 +197,12 @@ def unsubscribe(name):
     if user_id is None:
         return redirect(url_for("index"))
 
-    success = db.unsubscribe_from_forum(user_id, subforum["id"])
+    is_unsubscribed = db.unsubscribe_from_forum(user_id, subforum["id"])
 
-    if len(success) > 0:
-
-        flash("Du har avprenumererat från subforumet!")
+    if is_unsubscribed:
+        flash("Du har avprenumererat från subforumet!","success")
     else:
-        flash("Du prenumererar inte på subforumet!")
+        flash("Du prenumererar inte på subforumet!","warning")
     return redirect(url_for("show_subforum", name=subforum["name"]))
 
 @app.route("/thread/<int:thread_id>")
@@ -257,12 +253,12 @@ def delete_subforum(name):
 
     success = db.delete_subforum_from_db(name, user_id)
     if not success:
-        flash("Du har inte rättigheter att ta bort detta subforum.")
+        flash("Du har inte rättigheter att ta bort detta subforum.","danger")
     else:
-        flash("Subforumet har tagits bort.")
+        flash("Subforumet har tagits bort.","success")
     return redirect(url_for("profile"))
 
-    
+
 
 
 

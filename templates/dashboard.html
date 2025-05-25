@@ -10,7 +10,7 @@
           <h5 class="text-center card-title">{{ thread.title }}</h5>
 
           <a href="{{ thread.spotify_url }}" target="_blank">
-            <img class="thread_image card-img-top" src="{{ thread.image_url }}" alt="Spotify Album Cover" />
+            <img class="thread_image card-img-top" src="{{ thread.album_image }}" alt="Spotify Album Cover" />
           </a>
 
           <div class="card-body">
@@ -40,7 +40,6 @@
       </div>
       {% endfor %}
     </div>
-
-    {% endblock %}
   </div>
 </div>
+    {% endblock %}

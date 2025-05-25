@@ -317,7 +317,10 @@ def subscribe_to_forum(user_id, forum_id):
         )
         inserted = cur.fetchone()
         conn.commit()
-        return inserted
+        return inserted is not None
+    except Exception as e:
+        print(f"Error subscribing to forum: {e}")
+        return False
     finally:
         cur.close()
         conn.close()
@@ -336,8 +339,9 @@ def unsubscribe_from_forum(user_id, forum_id):
 
     Returns
     -------
-        inserted : tuple
-            A tuple containing the ID of the deleted subscription.
+        bools
+            True if the user was successfully subscribed
+            False if the user was already subscribed
     """
     conn = get_connection()
     cur = conn.cursor()
@@ -350,9 +354,9 @@ def unsubscribe_from_forum(user_id, forum_id):
             """,
             (user_id, forum_id),
         )
-        deleted = cur.fetchone()
+        unsubscribe = cur.fetchone()
         conn.commit()
-        return deleted
+        return unsubscribe is not None
     finally:
         cur.close()
         conn.close()
@@ -487,7 +491,13 @@ def get_thread_by_id(thread_id):
     cur = conn.cursor()
     try:
         cur.execute("""
-            SELECT threads.id , threads.title, threads.description, threads.spotify_url, threads.created_at, users.username
+            SELECT
+                threads.id,
+                threads.title,
+                threads.description,
+                threads.spotify_url,
+                threads.created_at,
+                users.username
             FROM threads
             JOIN users ON threads.creator_id = users.id
             WHERE threads.id = %s
@@ -502,6 +512,9 @@ def get_thread_by_id(thread_id):
                 "created_at": row[4],
                 "username": row[5]
             }
+        return None
+    except Exception as e:
+        print(f"Error fetching thread by id: {e}")
         return None
     finally:
         cur.close()
@@ -540,6 +553,9 @@ def get_comments_for_thread(thread_id):
 
                 }
                 for row in rows]
+    except Exception as e:
+        print(f"Error fetching comments for thread {thread_id}: {e}")
+        return []
     finally:
         cur.close()
         conn.close()
@@ -604,6 +620,61 @@ def get_user_role(user_id):
     return result[0] if result else None
 
 
+def get_threads_by_user_subscriptions(user_id):
+    """Retrives all threads the user is subscribed to.
 
+    Args
+    ------
+        user_id : int
+            The ID of the user in the database
 
+    Returns
+    -------
+        list of dict
+            A list of dictionaries with the following key
+            - id : int
+            - title : str
+            - description : str
+            - spotify_url : str
+            -created_at : datetime
+            - username : str
+
+        Returns an empty list if no threads are found or an error occurs.
+    """
+
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+                    SELECT
+                        threads.id,
+                        threads.title,
+                        threads.description,
+                        threads.spotify_url,
+                        threads.created_at,
+                        users.username
+                    FROM threads
+                    JOIN users ON threads.creator_id = users.id
+                    JOIN subforum_subscriptions ss ON ss.forum_id = threads.forum_id
+                    WHERE ss.user_id = %s
+                    ORDER BY threads.created_at DESC
+                        """, (user_id,))
+        subscriptions= cur.fetchall()
+        return [
+            {
+                "id": row[0],
+                "title": row[1],
+                "description": row[2],
+                "spotify_url": row[3],
+                "created_at": row[4],
+                "username": row[5]
+            }
+            for row in subscriptions
+        ]
+    except Exception as e:
+        print(f"Error fetching threads by user subscriptions: {e}")
+        return []
+    finally:
+        cur.close()
+        conn.close()
 

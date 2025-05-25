@@ -40,9 +40,9 @@
     <h5 class="text-center card-title">{{ thread.title }}</h5>
 
     <a href="{{ thread.spotify_url }}" target="blank">
-    <img class="thread_image card-img-top"
-    src="{{ thread.image_url }}"
-    alt="Spotify Album Cover">
+      <img class="thread_image card-img-top"
+      src="{{ thread.image_url }}"
+      alt="Spotify Album Cover">
     </a>
 
     <div class="card-body">
@@ -70,21 +70,10 @@
       </div>
     </div>
   </div>
-</div>
 {% endfor %}
-</div>
 
-<div class="col-md-4">
-    <div class="card bg-light shadow-sm">
-        <div class="card-header">
-            <strong>Beskrivning och regler</strong>
-        </div>
-        <div class="card-body">
-            <p class="card-text text-center">{{ forum["description"] }}</p>
-        </div>
-        </div>
-    </div>
-</div>
+
+
 
 <div class="modal fade" id="start_thread_modal" tabindex="-1" aria-labelledby="start_thread_modal_label" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
