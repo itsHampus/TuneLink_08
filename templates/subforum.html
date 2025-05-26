@@ -6,31 +6,43 @@
       <i class="bi bi-plus-lg me-2"></i>
       Starta tråd
     </button>
+</div>
 
+{% if role == 'admin' %}
+<div class="text-center my-4">
+    <form action="{{ url_for('delete_subforum', name=forum.name) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this subforum?');">
+        <button type="submit" class="btn btn-danger btn-lg">
+            <i class="bi bi-trash me-2"></i>
+            Delete Subforum
+        </button>
+    </form>
+</div>
+{% endif %}
     {% if forum["id"] in subscribed_forum_ids %}
-    <form action="{{ url_for('unsubscribe', name=forum["name"]) }}" method="post" class="mb-0">
+    <form action="{{ url_for('unsubscribe', name=forum['name']) }}" method="post" class="mb-0">
       <button type="submit" class="btn btn-danger btn-lg">Avprenumerera</button>
     </form>
     {% else %}
-    <form action="{{ url_for('subscribe', name=forum["name"]) }}" method="post" class="mb-0">
+    <form action="{{ url_for('subscribe', name=forum['name']) }}" method="post" class="mb-0">
       <button type="submit" class="btn btn-success btn-lg">Prenumerera</button>
     </form>
     {% endif %}
   </div>
 
 
-
-
-
+  <!-- for loop gets the thread info from show_subforum function in app.py" -->
 {% for thread in threads %}
 <div class="center_wrapper">
-<div class="thread_card card">
-    <p class="card-text"><small class="text-muted">Här är användaren som lagt upp</small></p>
-    <h5 class="text-center card-title">Titel på thread</h5>
+  <div class="thread_card card">
+    <p class="card-text"><small class="text-muted">Postad av användare {{ thread.username }}</small></p>
+    <h5 class="text-center card-title">{{ thread.title }}</h5>
     <img class="thread_image card-img-top" src="https://i.scdn.co/image/ab67616d0000b273fe168e1e3b834412cbe77793" alt="Card image cap">
     <div class="card-body">
-      <p class="card-text">Här skrivs beskrivning på tråd</p>
-      <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+      <p class="card-text">{{ thread.description }}</p>
+      <p class="card-text">
+      <small class="text-muted">Skapad: {{ thread.created_at }}</small>
+      </p>
+      <p class="card-text"><small class="text-muted"><a href="{{ thread.spotify_url }}" >Spotify-länk</a></small></p>
       <div class="d-flex gap-2 mb-3">
         <button type="button" class="btn btn-secondary">
           <i class="bi bi-hand-thumbs-up"></i>
@@ -44,9 +56,6 @@
         <button type="button" class="btn btn-secondary">
           <i class="bi bi-share"></i>
         </button>
-      </div>
-      </button>
-
       </div>
     </div>
   </div>
@@ -66,6 +75,7 @@
     </div>
 </div>
 
+
 <div class="modal fade" id="start_thread_modal" tabindex="-1" aria-labelledby="start_thread_modal_label" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -82,8 +92,8 @@
               <!-- connecting form to create_thread funktionen in app.py -->
                 <form method="POST" action="{{ url_for('create_thread_app', name=forum['name']) }}">
                 <div class="mb-3">
-                  <label for="thread_title" class="form-label">Titel</label>
-                  <input type="text" class="form-control" id="thread_title" name="title" placeholder="Ange en titel..." required>
+                    <label for="thread_title" class="form-label">Titel</label>
+                    <input type="text" class="form-control" id="thread_title" name="title" placeholder="Ange en titel..." required>
 
                 </div>
                 <div class="mb-3">
@@ -107,6 +117,7 @@
       </div>
     </div>
   </div>
+
 
 
 {% endblock %}
