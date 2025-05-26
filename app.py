@@ -1,17 +1,23 @@
 import os
 
 from dotenv import load_dotenv
+from flask import (
+    Flask,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
+from spotipy import Spotify
 
-from flask import Flask, redirect, render_template, request, session, url_for, jsonify, flash
-
+import db
 from auth import handle_callback, spotify_auth
-from db import create_subforum_in_db, get_subforum_data, update_user_bio,search_subforums_by_name,  subscribe_to_forum, unsubscribe_from_forum, get_user_subscriptions,get_user_profile_db,get_subforum_by_name
 
-# setting import on a new line because the one above is too long
-from db import create_thread_db
 
 from spotify import get_user, get_user_profile
-from spotipy import Spotify
 
 load_dotenv()
 
@@ -21,31 +27,40 @@ app.secret_key = os.getenv("FLASK_SECRET")
 
 @app.context_processor
 def user_injection():
-    """Injects the user into the template context.
-
-    """
+    """Injects the user into the template context."""
     user = None
     subscribed_forums = []
     subscribed_forum_ids = []
-
+    role = None
     token_info = session.get("token_info")
     user_id = session.get("user_id")
-    print(f"DEBUG user_id from session: {user_id}")
+    
 
-    token_info = session.get("token_info")
     if token_info is not None:
         try:
             sp = Spotify(auth=token_info["access_token"])
             user = sp.current_user()
             if user_id is not None:
-                subscribed_forums = get_user_subscriptions(user_id)
+                subscribed_forums = db.get_user_subscriptions(user_id)
                 subscribed_forum_ids = [forum["id"] for forum in subscribed_forums]
+
+                role = db.get_user_role(user_id)
 
         except Exception as e:
             print(f"Fel vid hämtning av användarinfo: {e}")
+
     return dict(user=user,
                 subscribed_forums=subscribed_forums,
-                subscribed_forum_ids=subscribed_forum_ids,)
+                subscribed_forum_ids=subscribed_forum_ids,
+                role=role,)
+
+    return dict(
+        user=user,
+        subscribed_forums=subscribed_forums,
+        subscribed_forum_ids=subscribed_forum_ids,
+    )
+
+
 
 @app.route("/")
 def index():
@@ -88,7 +103,7 @@ def create_subforum():
     if creator_id is None:
         return redirect(url_for("index"))
 
-    is_subforum_created = create_subforum_in_db(name, description, creator_id)
+    is_subforum_created = db.create_subforum_in_db(name, description, creator_id)
     if is_subforum_created is False:
         return render_template(
             "error.html", error="Subforum med samma namn existerar redan."
@@ -105,13 +120,13 @@ def create_bio():
     if creator_id is None:
         return redirect(url_for("index"))
 
-    update_user_bio(bio, song, creator_id)
+    db.update_user_bio(bio, song, creator_id)
     return redirect(url_for("profile"))
 
 
 @app.route("/subforum/<name>")
 def show_subforum(name):
-    subforum_data_dict = get_subforum_data(name)
+    subforum_data_dict = db.get_subforum_data(name)
     if subforum_data_dict is None:
         return redirect(url_for("error", error="Subforumet existerar inte."))
 
@@ -125,9 +140,10 @@ def show_subforum(name):
         user=user,
     )
 
+
 @app.route("/subscribe/<string:name>", methods=["POST"])
 def subscribe(name):
-    subforum = get_subforum_by_name(name)
+    subforum = db.get_subforum_by_name(name)
     if subforum is None:
         return redirect(url_for("error", error="Subforumet existerar inte."))
 
@@ -135,19 +151,17 @@ def subscribe(name):
     if user_id is None:
         return redirect(url_for("index"))
 
-    success = subscribe_to_forum(user_id, subforum["id"])
-    if success is True:
-        flash("Du har nu prenumererat på subforumet!")
+    success = db.subscribe_to_forum(user_id, subforum["id"])
+    if len(success) > 0:
+        flash("Du prenumerar nu på subforumet!")
     else:
         flash("Du prenumererar redan på subforumet!")
-    return redirect(url_for("show_subforum", name = subforum["name"]))
+    return redirect(url_for("show_subforum", name=subforum["name"]))
+
 
 @app.route("/unsubscribe/<string:name>", methods=["POST"])
 def unsubscribe(name):
-    """
-    Unsubscribes the user from a subforum.
-    Args"""
-    subforum = get_subforum_by_name(name)
+    subforum = db.get_subforum_by_name(name)
     if subforum is None:
         return redirect(url_for("error", error="subforumet existerar inte."))
 
@@ -155,12 +169,12 @@ def unsubscribe(name):
     if user_id is None:
         return redirect(url_for("index"))
 
-    success = unsubscribe_from_forum(user_id, subforum["id"])
-    if success is True:
+    success = db.unsubscribe_from_forum(user_id, subforum["id"])
+    if len(success) > 0:
         flash("Du har avprenumererat från subforumet!")
     else:
         flash("Du prenumererar inte på subforumet!")
-    return redirect(url_for("show_subforum", name = subforum["name"]))
+    return redirect(url_for("show_subforum", name=subforum["name"]))
 
 
 @app.route("/error")
@@ -183,9 +197,24 @@ def page_not_found(err):
     )
 
 
+
+
+@app.route("/delete_subforum/<name>", methods=["POST"])
+def delete_subforum(name):
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for("index"))
+
+    success = db.delete_subforum_from_db(name, user_id)
+    if not success:
+        flash("Du har inte rättigheter att ta bort detta subforum.")
+    else:
+        flash("Subforumet har tagits bort.")
+    return redirect(url_for("profile"))
+
+
 @app.route("/subforum/<name>/create_thread_route", methods=["POST"])
 def create_thread_app(name):
-
     """ function that creates a thread, function name ends with _app to avoid confusion with the function in db.py
         it gets the values from the modal in subforum.html
 
@@ -199,13 +228,11 @@ def create_thread_app(name):
 
         """
 
-    subforum = get_subforum_by_name(name)
+    subforum = db.get_subforum_by_name(name)
     if subforum is None:
         return redirect(url_for("error", error="Subforumet existerar inte."))
 
-    
     subforum_id = subforum["id"]
-        
 
     title = request.form.get("title")
 
@@ -217,23 +244,23 @@ def create_thread_app(name):
 
     # if invalid spotify url is entered the form will give None or empty string and cause problems
     # so error is returned
-    
-    if spotify_url == None or "":
-        return redirect(url_for("error"), error="invalid spotify url")
+
+    if not spotify_url:
+        return redirect(url_for("error"), error="ogiltlig spotify url")
 
     description = request.form.get("description")
 
     # if description is None or empty string it will also cause problems
-    if description == None or "":
-        return redirect(url_for("error"), error="invalid description")
+    if not description:
+        return redirect(url_for("error"), error="ogiltlig description")
 
     creator_id = session.get("user_id")
 
     # checking if creator_id and subforum id is not int type because otherwise it will cause problems
     if not creator_id:
-        return redirect(url_for("index"), error="ogiltligt")
+        return redirect(url_for("index"), error="ogiltlig användare")
 
-    create_thread_db(subforum_id, creator_id, title, spotify_url, description)
+    db.create_thread_db(subforum_id, creator_id, title, spotify_url, description)
 
     return redirect(url_for("show_subforum", name=name))
 
@@ -243,14 +270,16 @@ def logout():
     session.clear()
     return redirect(url_for("index"))
 
+
 @app.route("/ajax/search_subforums")
 def ajax_search_subforums():
     query = request.args.get("q", "").strip()
     if query is None:
         return jsonify([])
 
-    results = search_subforums_by_name(query)
+    results = db.search_subforums_by_name(query)
     return jsonify(results)
+
 
 
 if __name__ == "__main__":
