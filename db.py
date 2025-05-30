@@ -82,6 +82,53 @@ def get_threads_by_name(name):
         return None
 
 
+def create_thread_in_db(forum_id, creator_id, title, spotify_url, description):
+    """Function that creates a thread and inserts it into the database table "threads". Function name ends with _db to avoid confusion with the function in app.py.
+
+    Args
+    -------
+        forum_id : int
+            ID of the forum.
+        creator_id : int
+            ID of the user creating the thread.
+        title : str
+            Title of the thread.
+        spotify_url : str
+            Spotify URL of the thread.
+        description : str
+            Description to the thread.
+    Returns
+    -------
+        None
+    """
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    try:
+        cur.execute(
+            """
+            INSERT INTO threads (
+                forum_id,
+                creator_id,
+                title, 
+                spotify_url,
+                description
+            )
+            VALUES (%s, %s, %s, %s, %s)
+            """,
+            (forum_id, creator_id, title, spotify_url, description),
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print("Error trying to create thread in db at create_thread_db: " + str(e))
+    finally:
+        cur.close()
+        conn.close()
+
+
 def get_threads_by_forum(forum_id):
     """Fetches all threads associated with a specific forum based on the forum ID.
 
@@ -95,40 +142,55 @@ def get_threads_by_forum(forum_id):
             A list of dictionaries, each containing the thread's information.
     """
     conn = get_connection()
-    cur = conn.cursor()
-    cur.execute(
-        """
-        SELECT threads.id, threads.forum_id, threads.creator_id,threads.title,threads.spotify_url,
-        threads.description, threads.is_pinned, threads.created_at,threads.updated_at,
-        users.username
-        FROM threads
-        JOIN users ON threads.creator_id = users.id
-        WHERE threads.forum_id = %s
-        ORDER BY threads.created_at DESC
-        """,
-        (forum_id,),
-    )
-    rows = cur.fetchall()
-    cur.close()
-    conn.close()
 
     threads = []
-    for row in rows:
-        thread = {
-            "id": row[0],
-            "forum_id": row[1],
-            "creator_id": row[2],
-            "title": row[3],
-            "spotify_url": row[4],
-            "description": row[5],
-            "is_pinned": row[6],
-            "created_at": row[7],
-            "updated_at": row[8],
-            "username": row[9]
-        }
-        threads.append(thread)
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            SELECT
+                threads.id,
+                threads.forum_id,
+                threads.creator_id, 
+                threads.title,
+                threads.spotify_url, 
+                threads.description, 
+                threads.is_pinned,
+                threads.created_at, 
+                threads.updated_at, 
+                users.username
+            FROM threads
+            JOIN users ON threads.creator_id = users.id
+            WHERE threads.forum_id = %s
+            ORDER BY threads.created_at DESC
+            """,
+            (forum_id,),
+        )
+        rows = cur.fetchall()
 
-    return threads
+        for row in rows:
+            thread = {
+                "id": row[0],
+                "forum_id": row[1],
+                "creator_id": row[2],
+                "title": row[3],
+                "spotify_url": row[4],
+                "description": row[5],
+                "is_pinned": row[6],
+                "created_at": row[7],
+                "updated_at": row[8],
+                "username": row[9],
+            }
+            threads.append(thread)
+
+        return threads
+    except Exception as e:
+        print(f"Error fetching threads in get_threads_by_forum: {e}")
+        return []
+    finally:
+        conn.close()
+        cur.close()
+
 
 
 def get_user_profile_db(user_id):
@@ -471,6 +533,7 @@ def get_subforum_by_name(name):
         conn.close()
 
 
+
 def get_thread_by_id(thread_id):
     """Fetches a thread by its id from the DB
 
@@ -564,6 +627,7 @@ def get_comments_for_thread(thread_id):
 
 
 
+
 def delete_subforum_from_db(name, user_id):
     """
     Deletes a subforum from the database if the user is an admin.
@@ -584,7 +648,7 @@ def delete_subforum_from_db(name, user_id):
     cur = conn.cursor()
     cur.execute("SELECT role FROM users WHERE id = %s", (user_id,))
     result = cur.fetchone()
-    if not result or result[0] != 'admin' :
+    if not result or result[0] != "admin":
         cur.close()
         conn.close()
         return False
@@ -597,7 +661,6 @@ def delete_subforum_from_db(name, user_id):
 
 
 def get_user_role(user_id):
-
     """
     Fetches the role of a user from the database.
 
@@ -618,6 +681,7 @@ def get_user_role(user_id):
     cur.close()
     conn.close()
     return result[0] if result else None
+
 
 
 def get_threads_by_user_subscriptions(user_id):
@@ -677,4 +741,5 @@ def get_threads_by_user_subscriptions(user_id):
     finally:
         cur.close()
         conn.close()
+
 

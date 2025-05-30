@@ -18,8 +18,10 @@ import db
 from auth import handle_callback, spotify_auth
 
 
+
 from spotify import get_user, get_user_profile, get_album_image_url,get_dashboard_data
 from spotipy import Spotify
+
 
 
 load_dotenv()
@@ -52,17 +54,18 @@ def user_injection():
         except Exception as e:
             print(f"Fel vid hämtning av användarinfo: {e}")
 
-    return dict(user=user,
-                subscribed_forums=subscribed_forums,
-                subscribed_forum_ids=subscribed_forum_ids,
-                role=role,)
+    return dict(
+        user=user,
+        subscribed_forums=subscribed_forums,
+        subscribed_forum_ids=subscribed_forum_ids,
+        role=role,
+    )
 
     return dict(
         user=user,
         subscribed_forums=subscribed_forums,
         subscribed_forum_ids=subscribed_forum_ids,
     )
-
 
 
 @app.route("/")
@@ -166,6 +169,34 @@ def show_subforum(name):
     )
 
 
+@app.route("/subforum/<name>/create_thread_app", methods=["POST"])
+def create_thread_in_app(name):
+    creator_id = session.get("user_id")
+    if creator_id is None:
+        return redirect(url_for("index"))
+
+    subforum = db.get_subforum_by_name(name)
+    if subforum is None:
+        return redirect(url_for("error", error="Subforumet existerar inte."))
+
+    subforum_id = subforum["id"]
+
+    title = request.form.get("thread_title")
+    if not title:
+        return redirect(url_for("error", error="Inläggstitel kan inte vara tom."))
+
+    spotify_url = request.form.get("spotify_url")
+    if not spotify_url:
+        return redirect(url_for("error", error="Spotify URL kan inte vara tom."))
+
+    description = request.form.get("thread_description")
+    if not description:
+        return redirect(url_for("error", error="Inläggsbeskrivning kan inte vara tom."))
+
+    db.create_thread_in_db(subforum_id, creator_id, title, spotify_url, description)
+    return redirect(url_for("show_subforum", name=name))
+
+
 @app.route("/subscribe/<string:name>", methods=["POST"])
 def subscribe(name):
     subforum = db.get_subforum_by_name(name)
@@ -243,8 +274,6 @@ def page_not_found(err):
     )
 
 
-
-
 @app.route("/delete_subforum/<name>", methods=["POST"])
 def delete_subforum(name):
     user_id = session.get("user_id")
@@ -257,9 +286,6 @@ def delete_subforum(name):
     else:
         flash("Subforumet har tagits bort.","success")
     return redirect(url_for("profile"))
-
-
-
 
 
 @app.route("/logout")
@@ -276,7 +302,6 @@ def ajax_search_subforums():
 
     results = db.search_subforums_by_name(query)
     return jsonify(results)
-
 
 
 if __name__ == "__main__":
