@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from flask import (
     Flask,
     flash,
+    get_flashed_messages,
     jsonify,
     redirect,
     render_template,
@@ -15,7 +16,7 @@ from spotipy import Spotify
 
 import db
 from auth import handle_callback, spotify_auth
-from spotify import get_user, get_user_profile
+from spotify import get_album_image_url, get_dashboard_data, get_user, get_user_profile
 
 load_dotenv()
 
@@ -33,15 +34,13 @@ def user_injection():
     token_info = session.get("token_info")
     user_id = session.get("user_id")
 
-    if token_info is not None:
+    if token_info is not None and user_id is not None:
         try:
-            sp = Spotify(auth=token_info["access_token"])
-            user = sp.current_user()
-            if user_id is not None:
-                subscribed_forums = db.get_user_subscriptions(user_id)
-                subscribed_forum_ids = [forum["id"] for forum in subscribed_forums]
+            user = get_user(token_info["access_token"])
 
-                role = db.get_user_role(user_id)
+            subscribed_forums = db.get_user_subforum_subscriptions(user_id)
+            subscribed_forum_ids = [forum["id"] for forum in subscribed_forums]
+            role = db.get_user_role(user_id)
 
         except Exception as e:
             print(f"Fel vid hämtning av användarinfo: {e}")
@@ -51,12 +50,6 @@ def user_injection():
         subscribed_forums=subscribed_forums,
         subscribed_forum_ids=subscribed_forum_ids,
         role=role,
-    )
-
-    return dict(
-        user=user,
-        subscribed_forums=subscribed_forums,
-        subscribed_forum_ids=subscribed_forum_ids,
     )
 
 
@@ -70,6 +63,18 @@ def index():
 def callback():
     handle_callback(session)
     return redirect(url_for("profile"))
+
+
+@app.route("/dashboard")
+def dashboard():
+    user_id = session.get("user_id")
+    token_info = session.get("token_info")
+    if token_info is None or user_id is None:
+        return redirect(url_for("index"))
+
+    user, threads = get_dashboard_data(token_info, user_id)
+
+    return render_template("dashboard.html", threads=threads, user=user)
 
 
 @app.route("/profile")
@@ -128,13 +133,22 @@ def show_subforum(name):
     if subforum_data_dict is None:
         return redirect(url_for("error", error="Subforumet existerar inte."))
 
+    token_info = session.get("token_info")
+    if token_info is None:
+        return redirect(url_for("index"))
+
+    sp = Spotify(auth=token_info["access_token"])
     user = get_user(session["token_info"]["access_token"])
+
+    threads = subforum_data_dict["threads"]
+    for thread in threads:
+        thread["image_url"] = get_album_image_url(thread["spotify_url"], sp)
 
     return render_template(
         "subforum.html",
         name=name,
         forum=subforum_data_dict["subforum"],
-        threads=subforum_data_dict["threads"],
+        threads=threads,
         user=user,
     )
 
@@ -177,16 +191,18 @@ def subscribe(name):
     if user_id is None:
         return redirect(url_for("index"))
 
-    success = db.subscribe_to_forum(user_id, subforum["id"])
-    if len(success) > 0:
-        flash("Du prenumerar nu på subforumet!")
+    is_subscribed = db.subscribe_to_forum(user_id, subforum["id"])
+
+    if is_subscribed:
+        flash("Du prenumererar nu på subforumet!", "success")
     else:
-        flash("Du prenumererar redan på subforumet!")
+        flash("Fel uppstod vid prenumereration på subforumet!", "warning")
     return redirect(url_for("show_subforum", name=subforum["name"]))
 
 
 @app.route("/unsubscribe/<string:name>", methods=["POST"])
 def unsubscribe(name):
+
     subforum = db.get_subforum_by_name(name)
     if subforum is None:
         return redirect(url_for("error", error="subforumet existerar inte."))
@@ -195,12 +211,30 @@ def unsubscribe(name):
     if user_id is None:
         return redirect(url_for("index"))
 
-    success = db.unsubscribe_from_forum(user_id, subforum["id"])
-    if len(success) > 0:
-        flash("Du har avprenumererat från subforumet!")
+    is_unsubscribed = db.unsubscribe_from_forum(user_id, subforum["id"])
+
+    if is_unsubscribed:
+        flash("Du har avprenumererat från subforumet!", "success")
     else:
-        flash("Du prenumererar inte på subforumet!")
+        flash("Du prenumererar inte på subforumet!", "warning")
     return redirect(url_for("show_subforum", name=subforum["name"]))
+
+
+@app.route("/thread/<int:thread_id>")
+def show_thread(thread_id):
+    thread = db.get_thread_by_id(thread_id)
+    if thread is None:
+        return redirect(url_for("error", error="Tråden existerar inte."))
+
+    token_info = session.get("token_info")
+    if token_info is None:
+        return redirect(url_for("index"))
+
+    sp = Spotify(auth=token_info["access_token"])
+    thread["image_url"] = get_album_image_url(thread["spotify_url"], sp)
+
+    comments = db.get_comments_for_thread(thread_id)
+    return render_template("thread.html", thread=thread, comments=comments)
 
 
 @app.route("/error")
@@ -231,9 +265,9 @@ def delete_subforum(name):
 
     success = db.delete_subforum_from_db(name, user_id)
     if not success:
-        flash("Du har inte rättigheter att ta bort detta subforum.")
+        flash("Du har inte rättigheter att ta bort detta subforum.", "danger")
     else:
-        flash("Subforumet har tagits bort.")
+        flash("Subforumet har tagits bort.", "success")
     return redirect(url_for("profile"))
 
 
