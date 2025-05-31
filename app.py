@@ -4,25 +4,19 @@ from dotenv import load_dotenv
 from flask import (
     Flask,
     flash,
+    get_flashed_messages,
     jsonify,
     redirect,
     render_template,
     request,
     session,
     url_for,
-    get_flashed_messages
 )
 from spotipy import Spotify
 
 import db
 from auth import handle_callback, spotify_auth
-
-
-
-from spotify import get_user, get_user_profile, get_album_image_url,get_dashboard_data
-from spotipy import Spotify
-
-
+from spotify import get_album_image_url, get_dashboard_data, get_user, get_user_profile
 
 load_dotenv()
 
@@ -39,7 +33,6 @@ def user_injection():
     role = None
     token_info = session.get("token_info")
     user_id = session.get("user_id")
-
 
     if token_info is not None:
         try:
@@ -61,12 +54,6 @@ def user_injection():
         role=role,
     )
 
-    return dict(
-        user=user,
-        subscribed_forums=subscribed_forums,
-        subscribed_forum_ids=subscribed_forum_ids,
-    )
-
 
 @app.route("/")
 def index():
@@ -79,6 +66,7 @@ def callback():
     handle_callback(session)
     return redirect(url_for("profile"))
 
+
 @app.route("/dashboard")
 def dashboard():
     user_id = session.get("user_id")
@@ -88,9 +76,7 @@ def dashboard():
 
     user, threads = get_dashboard_data(token_info, user_id)
 
-    return render_template("dashboard.html",
-                            threads=threads,
-                            user=user)
+    return render_template("dashboard.html", threads=threads, user=user)
 
 
 @app.route("/profile")
@@ -210,7 +196,7 @@ def subscribe(name):
     success = db.subscribe_to_forum(user_id, subforum["id"])
 
     if success:
-        flash("Du har nu prenumererat på subforumet!","success")
+        flash("Du har nu prenumererat på subforumet!", "success")
 
     else:
         flash("Du prenumererar nu på subforumet!", "success")
@@ -231,10 +217,11 @@ def unsubscribe(name):
     is_unsubscribed = db.unsubscribe_from_forum(user_id, subforum["id"])
 
     if is_unsubscribed:
-        flash("Du har avprenumererat från subforumet!","success")
+        flash("Du har avprenumererat från subforumet!", "success")
     else:
-        flash("Du prenumererar inte på subforumet!","warning")
+        flash("Du prenumererar inte på subforumet!", "warning")
     return redirect(url_for("show_subforum", name=subforum["name"]))
+
 
 @app.route("/thread/<int:thread_id>")
 def show_thread(thread_id):
@@ -250,9 +237,8 @@ def show_thread(thread_id):
     thread["image_url"] = get_album_image_url(thread["spotify_url"], sp)
 
     comments = db.get_comments_for_thread(thread_id)
-    return render_template("thread.html",
-                        thread=thread,
-                        comments=comments)
+    return render_template("thread.html", thread=thread, comments=comments)
+
 
 @app.route("/error")
 def error():
@@ -282,9 +268,9 @@ def delete_subforum(name):
 
     success = db.delete_subforum_from_db(name, user_id)
     if not success:
-        flash("Du har inte rättigheter att ta bort detta subforum.","danger")
+        flash("Du har inte rättigheter att ta bort detta subforum.", "danger")
     else:
-        flash("Subforumet har tagits bort.","success")
+        flash("Subforumet har tagits bort.", "success")
     return redirect(url_for("profile"))
 
 
