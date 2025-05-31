@@ -192,7 +192,6 @@ def get_threads_by_forum(forum_id):
         cur.close()
 
 
-
 def get_user_profile_db(user_id):
     """Fetches the user profile from the database based on the user ID.
 
@@ -358,12 +357,9 @@ def subscribe_to_forum(user_id, forum_id):
 
     Returns
     -------
-
-        tuple
-            The inserted row containing the users ID and forum ID.
-
-        None
-            if the user already is subscribed.
+        bool
+            True if the subscription was successful,
+            False if the user was already subscribed or an error occurred.
 
     """
     conn = get_connection()
@@ -373,13 +369,16 @@ def subscribe_to_forum(user_id, forum_id):
             """
             INSERT INTO subforum_subscriptions (user_id, forum_id)
             VALUES (%s, %s)
-            ON CONFLICT DO NOTHING RETURNING id
+            ON CONFLICT DO NOTHING
             """,
             (user_id, forum_id),
         )
-        inserted = cur.fetchone()
         conn.commit()
-        return inserted is not None
+
+        if cur.rowcount > 0:
+            return True
+        else:
+            return False
     except Exception as e:
         print(f"Error subscribing to forum: {e}")
         return False
@@ -412,13 +411,17 @@ def unsubscribe_from_forum(user_id, forum_id):
             """
             DELETE FROM subforum_subscriptions
             WHERE user_id = %s AND forum_id = %s
-            RETURNING id
             """,
             (user_id, forum_id),
         )
-        unsubscribe = cur.fetchone()
         conn.commit()
-        return unsubscribe is not None
+        if cur.rowcount > 0:
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(f"Error unsubscribing from forum: {e}")
+        return False
     finally:
         cur.close()
         conn.close()
@@ -457,8 +460,7 @@ def search_subforums_by_name(query):
         conn.close()
 
 
-
-def get_user_subscriptions(user_id):
+def get_user_subforum_subscriptions(user_id):
     """Fetches all subforums the user is subscribed to.
 
     Args
@@ -469,7 +471,7 @@ def get_user_subscriptions(user_id):
 
     Returns
     -------
-        dict
+        list of dict
             A list of dictionaries containing the subforum's id (int) and name (str)
 
     """
@@ -487,14 +489,16 @@ def get_user_subscriptions(user_id):
         )
         rows = cur.fetchall()
         return [{"id": row[0], "name": row[1]} for row in rows]
+    except Exception as e:
+        print(f"Error fetching user subforum subscriptions: {e}")
+        return []
     finally:
         cur.close()
         conn.close()
 
 
 def get_subforum_by_name(name):
-
-    """""fetches a subforum by its name from the database.
+    """Fetches a subforum by its name from the database.
 
 
     Args
@@ -533,7 +537,6 @@ def get_subforum_by_name(name):
         conn.close()
 
 
-
 def get_thread_by_id(thread_id):
     """Fetches a thread by its id from the DB
 
@@ -553,7 +556,8 @@ def get_thread_by_id(thread_id):
     conn = get_connection()
     cur = conn.cursor()
     try:
-        cur.execute("""
+        cur.execute(
+            """
             SELECT
                 threads.id,
                 threads.title,
@@ -564,16 +568,18 @@ def get_thread_by_id(thread_id):
             FROM threads
             JOIN users ON threads.creator_id = users.id
             WHERE threads.id = %s
-            """, (thread_id,))
+            """,
+            (thread_id,),
+        )
         row = cur.fetchone()
         if row is not None:
-            return{
+            return {
                 "id": row[0],
                 "title": row[1],
                 "description": row[2],
                 "spotify_url": row[3],
                 "created_at": row[4],
-                "username": row[5]
+                "username": row[5],
             }
         return None
     except Exception as e:
@@ -582,6 +588,7 @@ def get_thread_by_id(thread_id):
     finally:
         cur.close()
         conn.close()
+
 
 def get_comments_for_thread(thread_id):
     """
@@ -601,31 +608,34 @@ def get_comments_for_thread(thread_id):
     conn = get_connection()
     cur = conn.cursor()
     try:
-        cur.execute("""
-            SELECT t_comments.description, t_comments.created_at, users.username
+        cur.execute(
+            """
+            SELECT
+                t_comments.description,
+                t_comments.created_at,
+                users.username
             FROM t_comments
             JOIN users ON t_comments.user_id = users.id
             WHERE t_comments.thread_id = %s
             ORDER BY t_comments.created_at DESC
-                """, (thread_id,))
+            """,
+            (thread_id,),
+        )
         rows = cur.fetchall()
-        return [{
+        return [
+            {
                 "description": row[0],
                 "created_at": row[1],
                 "username": row[2],
-
-                }
-                for row in rows]
+            }
+            for row in rows
+        ]
     except Exception as e:
         print(f"Error fetching comments for thread {thread_id}: {e}")
         return []
     finally:
         cur.close()
         conn.close()
-
-
-
-
 
 
 def delete_subforum_from_db(name, user_id):
@@ -683,7 +693,6 @@ def get_user_role(user_id):
     return result[0] if result else None
 
 
-
 def get_threads_by_user_subscriptions(user_id):
     """Retrives all threads the user is subscribed to.
 
@@ -709,21 +718,24 @@ def get_threads_by_user_subscriptions(user_id):
     conn = get_connection()
     cur = conn.cursor()
     try:
-        cur.execute("""
-                    SELECT
-                        threads.id,
-                        threads.title,
-                        threads.description,
-                        threads.spotify_url,
-                        threads.created_at,
-                        users.username
-                    FROM threads
-                    JOIN users ON threads.creator_id = users.id
-                    JOIN subforum_subscriptions ss ON ss.forum_id = threads.forum_id
-                    WHERE ss.user_id = %s
-                    ORDER BY threads.created_at DESC
-                        """, (user_id,))
-        subscriptions= cur.fetchall()
+        cur.execute(
+            """
+            SELECT
+                threads.id,
+                threads.title,
+                threads.description,
+                threads.spotify_url,
+                threads.created_at,
+                users.username
+            FROM threads
+            JOIN users ON threads.creator_id = users.id
+            JOIN subforum_subscriptions ss ON ss.forum_id = threads.forum_id
+            WHERE ss.user_id = %s
+            ORDER BY threads.created_at DESC
+            """,
+            (user_id,),
+        )
+        subscriptions = cur.fetchall()
         return [
             {
                 "id": row[0],
@@ -731,7 +743,7 @@ def get_threads_by_user_subscriptions(user_id):
                 "description": row[2],
                 "spotify_url": row[3],
                 "created_at": row[4],
-                "username": row[5]
+                "username": row[5],
             }
             for row in subscriptions
         ]
@@ -741,5 +753,3 @@ def get_threads_by_user_subscriptions(user_id):
     finally:
         cur.close()
         conn.close()
-
-

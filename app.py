@@ -34,15 +34,13 @@ def user_injection():
     token_info = session.get("token_info")
     user_id = session.get("user_id")
 
-    if token_info is not None:
+    if token_info is not None and user_id is not None:
         try:
-            sp = Spotify(auth=token_info["access_token"])
-            user = sp.current_user()
-            if user_id is not None:
-                subscribed_forums = db.get_user_subscriptions(user_id)
-                subscribed_forum_ids = [forum["id"] for forum in subscribed_forums]
+            user = get_user(token_info["access_token"])
 
-                role = db.get_user_role(user_id)
+            subscribed_forums = db.get_user_subforum_subscriptions(user_id)
+            subscribed_forum_ids = [forum["id"] for forum in subscribed_forums]
+            role = db.get_user_role(user_id)
 
         except Exception as e:
             print(f"Fel vid hämtning av användarinfo: {e}")
@@ -193,13 +191,12 @@ def subscribe(name):
     if user_id is None:
         return redirect(url_for("index"))
 
-    success = db.subscribe_to_forum(user_id, subforum["id"])
+    is_subscribed = db.subscribe_to_forum(user_id, subforum["id"])
 
-    if success:
-        flash("Du har nu prenumererat på subforumet!", "success")
-
-    else:
+    if is_subscribed:
         flash("Du prenumererar nu på subforumet!", "success")
+    else:
+        flash("Fel uppstod vid prenumereration på subforumet!", "warning")
     return redirect(url_for("show_subforum", name=subforum["name"]))
 
 
