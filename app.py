@@ -128,6 +128,9 @@ def create_bio():
     if creator_id is None:
         return redirect(url_for("index"))
 
+    if not bio or not song:
+        return redirect(url_for("error", error="Bio eller låt saknas."))
+
     db.update_user_bio(bio, song, creator_id)
     return redirect(url_for("profile"))
 
