@@ -107,10 +107,15 @@ def create_subforum():
         return redirect(url_for("index"))
 
     is_subforum_created = db.create_subforum_in_db(name, description, creator_id)
+
+    if not name or not description:
+        return redirect(url_for("error", error="Namn eller beskrivning saknas."))
+        
     if is_subforum_created is False:
         return render_template(
             "error.html", error="Subforum med samma namn existerar redan."
         )
+    
     return redirect(url_for("show_subforum", name=name))
 
 
