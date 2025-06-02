@@ -147,6 +147,7 @@ def show_subforum(name):
     
     sp = Spotify(auth=token_info["access_token"])
     
+    # can cause keyError
     user = get_user(session["token_info"]["access_token"])
 
     threads = subforum_data_dict["threads"]
