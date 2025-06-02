@@ -144,8 +144,9 @@ def show_subforum(name):
     token_info = session.get("token_info")
     if token_info is None:
         return redirect(url_for("index"))
-
+    
     sp = Spotify(auth=token_info["access_token"])
+    
     user = get_user(session["token_info"]["access_token"])
 
     threads = subforum_data_dict["threads"]
