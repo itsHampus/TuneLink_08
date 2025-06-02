@@ -288,7 +288,8 @@ def logout():
 @app.route("/ajax/search_subforums")
 def ajax_search_subforums():
     query = request.args.get("q", "").strip()
-    if query is None:
+    # it can't give None, only empty strings
+    if not query:
         return jsonify([])
 
     results = db.search_subforums_by_name(query)
