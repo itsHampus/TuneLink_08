@@ -106,11 +106,16 @@ def create_subforum():
     if creator_id is None:
         return redirect(url_for("index"))
 
+    if not name or not description:
+        return redirect(url_for("error", error="Namn eller beskrivning saknas."))
+
     is_subforum_created = db.create_subforum_in_db(name, description, creator_id)
+        
     if is_subforum_created is False:
         return render_template(
             "error.html", error="Subforum med samma namn existerar redan."
         )
+    
     return redirect(url_for("show_subforum", name=name))
 
 
@@ -122,6 +127,9 @@ def create_bio():
 
     if creator_id is None:
         return redirect(url_for("index"))
+
+    if not bio or not song:
+        return redirect(url_for("error", error="Bio eller låt saknas."))
 
     db.update_user_bio(bio, song, creator_id)
     return redirect(url_for("profile"))
@@ -136,8 +144,10 @@ def show_subforum(name):
     token_info = session.get("token_info")
     if token_info is None:
         return redirect(url_for("index"))
-
+    
     sp = Spotify(auth=token_info["access_token"])
+    
+    # can cause keyError
     user = get_user(session["token_info"]["access_token"])
 
     threads = subforum_data_dict["threads"]
@@ -302,7 +312,8 @@ def logout():
 @app.route("/ajax/search_subforums")
 def ajax_search_subforums():
     query = request.args.get("q", "").strip()
-    if query is None:
+    # it can't give None, only empty strings
+    if not query:
         return jsonify([])
 
     results = db.search_subforums_by_name(query)
