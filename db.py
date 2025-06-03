@@ -143,6 +143,7 @@ def get_all_threads():
             FROM threads
             JOIN users ON threads.creator_id = users.id
             ORDER BY threads.created_at DESC
+            LIMIT 15
             """
         )
         rows = cur.fetchall()
