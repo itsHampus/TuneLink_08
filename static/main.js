@@ -41,15 +41,58 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     });
-        document.addEventListener('click', (event) => {
+    document.addEventListener('click', (event) => {
             if (!searchInput.contains(event.target) && !resultsContainer.contains(event.target)) {
                 resultsContainer.classList.add('d-none');
             }
-            });
+    });
 
-        document.addEventListener('keydown', (event) => {
+    document.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') {
             resultsContainer.classList.add('d-none');
             }
-        });
     });
+});
+
+const threadIdMatch = window.location.pathname.match(/\/thread\/(\d+)/);
+console.log('threadIdMatch: ', threadIdMatch)
+const threadId = threadIdMatch ? threadIdMatch[1] : null;
+
+function updateVoteCounts(data) {
+    if (data.likes !== undefined) {
+        document.getElementById("like-count").textContent = data.likes;
+    }
+    if (data.dislikes !== undefined) {
+        document.getElementById("dislike-count").textContent = data.dislikes;
+    }
+}
+
+if(threadId){
+    document.getElementById("like-button").addEventListener("click", () => {
+        fetch(`/thread/${threadId}/vote`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ vote: 1 })
+        })
+        .then(response => response.json())
+        .then(data => {
+            updateVoteCounts(data);
+        })
+    })
+
+    document.getElementById("dislike-button").addEventListener("click", () => {
+        fetch(`/thread/${threadId}/vote`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ vote: -1 })
+        })
+        .then(response => response.json())
+        .then(data => {
+            updateVoteCounts(data);
+        })
+    })
+}

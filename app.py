@@ -234,7 +234,29 @@ def show_thread(thread_id):
     thread["image_url"] = get_album_image_url(thread["spotify_url"], sp)
 
     comments = db.get_comments_for_thread(thread_id)
-    return render_template("thread.html", thread=thread, comments=comments)
+    likes_and_dislikes = db.get_thread_likes_and_dislikes(thread_id)
+    return render_template(
+        "thread.html",
+        thread=thread,
+        comments=comments,
+        likes=likes_and_dislikes["likes"],
+        dislikes=likes_and_dislikes["dislikes"],
+    )
+
+
+@app.route("/thread/<int:thread_id>/vote", methods=["POST"])
+def like_or_dislike_thread(thread_id):
+    user_id = session.get("user_id")
+    if user_id is None:
+        return jsonify({"error": "Användaren är inte inloggad."}), 401
+    like_or_dislike = request.json.get("vote")
+    if like_or_dislike not in [1, -1]:
+        return jsonify({"error": "Ogiltig röst."}), 400
+
+    db.register_thread_like_or_dislike(user_id, thread_id, like_or_dislike)
+    total_likes_and_dislikes = db.get_thread_likes_and_dislikes(thread_id)
+
+    return jsonify(total_likes_and_dislikes)
 
 
 @app.route("/error")
