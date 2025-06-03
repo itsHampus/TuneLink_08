@@ -1,13 +1,32 @@
-{% extends 'base.html' %} {% block content %}
-<h2 class="text-center">{{ thread.title }}</h2>
+{% extends 'base.html' %} 
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-center flex-grow-1">{{ thread.title }}</h2>
+        <a href="{{ url_for('show_subforum', name=thread.subforum_name) }}" class="btn btn-outline-primary ms-3">
+            &larr; Tillbaka till subforum
+        </a>
+    </div>
+    
     <p class="text-muted">{{ thread.username }} - {{ thread.created_at.strftime("%Y-%m-%d") }}</p>
 
     <div class="text-center my-3">
+
         <img src="{{ thread.image_url }}" alt="Album cover">
         <p class="text-center">{{ thread.description }}</p>
     </div>
 
     <div class="d-flex gap-2 mb-4">
+              <button type="button" class="btn btn-secondary" id="like-button">
+        <i class="bi bi-hand-thumbs-up"></i>
+        <span id="like-count">{{ likes }}</span>
+        </button>
+
+
+        <button type="button" class="btn btn-secondary" id="dislike-button">
+            <i class="bi bi-hand-thumbs-down"></i>
+            <span id="dislike-count">{{ dislikes }}</span>
+        </button>
   <a href="{{ thread.spotify_url }}" target="_blank" class="btn btn-success">
     <i class="fab fa-spotify me-1"></i>Spela i Spotify
   </a>
@@ -31,17 +50,14 @@
 {% endif %}
         
         <small class="text-muted">{{ comment.created_at.strftime("%Y-%m-%d") }}</small>
+
+
+        
+        <small class="text-muted">{{ comment.created_at.strftime("%Y-%m-%d") }}</small>
     </div>
 {% else %}
 <p class="text-muted">Inga kommentarer än.</p>
 {% endfor %}
-
-<h3>Lägg till en kommentar</h3>
-<button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#comment_modal">
-  Kommentera denna tråd
-</button>
-
-
-
+</div>
 
 {% endblock %}

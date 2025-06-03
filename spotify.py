@@ -1,8 +1,6 @@
 from spotipy import Spotify
 
-from db import get_user_profile_db,get_user_subscriptions,get_threads_by_forum
-
-
+from db import get_threads_by_user_subscriptions, get_user_profile_db
 
 
 def get_user_profile(access_token: str, user_id: str):
@@ -169,31 +167,6 @@ def get_user(access_token: str):
     return user
 
 
-
-# def get_album_image_url(spotify_url, sp):
-#     """Fetches the album image from spotify track URL
-
-#     Args
-#     -----
-#         spotify_url : str
-#             The Spotify track URL.
-
-#         sp: Spotify
-#             Spotipy client object
-
-#     Returns
-#     ------
-#         str
-#             Album image URL or if not found Placeholder TuneLink image
-#     """
-#     try:
-#         track_id = spotify_url.split("/")[-1].split("?")[0]
-#         track = sp.track(track_id)
-#         return track["album"]["images"][0]["url"]
-#     except Exception as e:
-#         print(f"Error fetching album image: {e}")
-#         return "/static/tunelink.png"
-
 def get_album_image_url(spotify_url, sp):
     """
     Fetches the album image from a Spotify track or album URL.
@@ -232,21 +205,34 @@ def get_album_image_url(spotify_url, sp):
 
 
 def get_dashboard_data(token_info, user_id):
-    sp = Spotify(auth=token_info["access_token"])
-    user = get_user(token_info["access_token"])
+    """Retrives user information and subscribed forum threads including assosiacted Spotify album images.
 
-    subscribed_forums = get_user_subscriptions(user_id)
-    forum_ids = [forum["id"] for forum in subscribed_forums]
+    Args
+    -------
+        token_info : dict
+            A dictionary containing the access token for Spotify API.
+        user_id : int
+            The ID of the user in the database.
 
-    threads = []
+    Returns
+    -------
+        tuple
+            A tuple containing the user profile and a list of threads with associated Spotify album images.
 
-    for forum in forum_ids:
-        forum_threads = get_threads_by_forum(forum)
-        for thread in forum_threads:
+    """
+    try:
+        sp = Spotify(auth=token_info["access_token"])
+        user = get_user(token_info["access_token"])
+
+        threads = get_threads_by_user_subscriptions(user_id)
+        for thread in threads:
             spotify_url = thread.get("spotify_url")
             if spotify_url is not None:
-                thread["image_url"] = get_album_image_url(spotify_url, sp)
+                thread["album_image"] = get_album_image_url(spotify_url, sp)
             else:
-                thread["image_url"] = "/static/tunelink.png"
-            threads.append(thread)
-    return user, threads
+                thread["album_image"] = "/static/tunelink.png"
+
+        return user, threads
+    except Exception as e:
+        print(f"[error] Failed to fetch dashboard data: {e}")
+        return None, []
