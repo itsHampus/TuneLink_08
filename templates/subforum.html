@@ -1,14 +1,29 @@
 {% extends 'base.html' %} {% block content %}
-<div>
-  <h1 class="text-center">{{ forum["name"] }}</h1>
-  <div class="text-center my-4">
-    <div class="d-flex justify-content-center align-items-center gap-2">
+
+<div class="container position-relative">
+  <div class="row">
+    <div class="col-md-12">
+      <h1 class="text-center">{{ forum["name"] }}</h1>
+      </div>
+      </div>
+
+      <div class="row justify-content-center align-items-center gap-2 my-3 flex-wrap">
+        <div class="col-md-8">
+    <div class="d-flex justify-content-center align-items-center gap-2 my-3 flex-wrap">
       <button type="button" class="btn btn-secondary btn-lg" data-bs-toggle="modal" data-bs-target="#start_thread_modal">
         <i class="bi bi-plus-lg me-2"></i>
         Starta tråd
       </button>
-    </div>
-  </div>
+
+      {% if forum["id"] in subscribed_forum_ids %}
+      <form action="{{ url_for('unsubscribe', name=forum['name']) }}" method="post" class="mb-0">
+        <button type="submit" class="btn btn-danger btn-lg">Avprenumerera</button>
+      </form>
+    {% else %}
+      <form action="{{ url_for('subscribe', name=forum['name']) }}" method="post" class="mb-0">
+        <button type="submit" class="btn btn-success btn-lg">Prenumerera</button>
+      </form>
+  {% endif %}
 
   {% if role == 'admin' %}
   <div class="text-center my-4">
@@ -18,19 +33,22 @@
               Delete Subforum
           </button>
       </form>
-  </div>
+      </div>
   {% endif %}
+    </div>
+  </div>
 
-  {% if forum["id"] in subscribed_forum_ids %}
-    <form action="{{ url_for('unsubscribe', name=forum['name']) }}" method="post" class="mb-0">
-      <button type="submit" class="btn btn-danger btn-lg">Avprenumerera</button>
-    </form>
-  {% else %}
-    <form action="{{ url_for('subscribe', name=forum['name']) }}" method="post" class="mb-0">
-      <button type="submit" class="btn btn-success btn-lg">Prenumerera</button>
-    </form>
+  <div class="rules-box">
+    <div class="card bg-light shadow-sm">
+      <div class="card-header">
+        <strong>Beskrivning och regler</strong>
+      </div>
+      <div class="card-body">
+        <p class="card-text text-center">{{ forum["description"] }}</p>
+      </div>
+    </div>
+  </div>
 
-{% endif %}
 </div>
 
 {% for thread in threads %}
@@ -68,19 +86,6 @@
 </div>
 {% endfor %}
 
-<!-- Forumregler-sektion -->
-<div class="col-md-4">
-  <div class="card bg-light shadow-sm">
-    <div class="card-header">
-      <strong>Beskrivning och regler</strong>
-    </div>
-    <div class="card-body">
-      <p class="card-text text-center">{{ forum["description"] }}</p>
-    </div>
-  </div>
-</div>
-
-  </div>
 
 
 
