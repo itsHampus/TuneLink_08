@@ -51,12 +51,6 @@
 
       <p class="card-text"><small class="text-muted">{{ thread.created_at.strftime("%Y-%m-%d") }}</small></p>
       <div class="d-flex gap-2 mb-3">
-        <button type="button" class="btn btn-secondary">
-          <i class="bi bi-hand-thumbs-up"></i>
-        </button>
-        <button type="button" class="btn btn-secondary">
-          <i class="bi bi-hand-thumbs-down"></i>
-        </button>
         <a href="{{ url_for('show_thread', thread_id = thread.id) }}" class="btn btn-secondary">
           <i class="bi bi-chat-dots-fill"></i>
         </a>
