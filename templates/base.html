@@ -25,7 +25,12 @@
         </div>
         <ul id="search-results" class="list-group dropdown-menu w-100 d-none mt-1" style="z-index:1050;"></ul>
       </div>
-
+      {% if not user and auth_url %}
+        <a href="{{ auth_url }}" class="btn btn-success d-inline-flex align-items-center px-4 py-2">
+          <i class="fab fa-spotify me-2"></i> Logga in med Spotify
+        </a>
+      </div>
+      {% else %}
         <div class="d-flex align-items-center">
           {% if user.images and user.images|length > 0 %}
           <img src="{{ user.images[0].url }}" alt="Profile Image" class="small-profile" alt="Profile">
@@ -37,12 +42,14 @@
           </div>
         </div>
       </div>
+      {% endif %}
     </nav>
 
     <div class="d-flex">
       <nav class="sidebar d-flex flex-column flex-shrink-0 position-fixed">
         <div class="nav flex-column">
-          <a href="{{ url_for('profile') }}" class="sidebar-link text-decoration-none p-3 active">
+          {% if session.get("user_id") %}
+          <a href="{{ url_for('index') }}" class="sidebar-link text-decoration-none p-3 active">
             <i class="bi bi-house-door me-3"></i>
             <span class="hide-on-collapse">Home</span>
           </a>
@@ -51,6 +58,14 @@
             <i class="fas fa-music me-3"></i>
             <span class="hide-on-collapse">Skapa ett nytt Subforum</span>
           </a>
+          {% else %}
+          <div class="sidebar-link text p-2">
+            <span class="hide-on-collapse">[Konto krävs] Profil</span>
+          </div>
+          <div class="sidebar-link text p-2">
+            <span class="hide-on-collapse">[Konto krävs] Skapa subforum</span>
+          </div>
+        {% endif %}
           {% for forum in subscribed_forums%}
           <a href="{{ url_for('show_subforum', name=forum['name']) }}" class="sidebar-link text-decoration-none p-3"
             class="sidebar-link text-decoration-none p-3 {% if forum ['name'] == name %}active{% endif %}">
@@ -58,7 +73,7 @@
             <span class="hide-on-collapse">{{ forum['name'] }}</span>
           </a>
           {% else %}
-          <div class="text-muted px-3 py-2 small">Du prenumererar inte på några subforum än!</div>
+          <div class="text px-3 py-2 small">Inga prenumerationer!</div>
           {% endfor %}
         </div>
 
@@ -81,7 +96,6 @@
       </main>
     </div>
 
-<!--Modal för att göra nytt subforum-->
 <div class="modal fade" id="start_subforum_modal" tabindex="-1" aria-labelledby="start_subforum_label" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">

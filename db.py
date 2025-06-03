@@ -111,7 +111,7 @@ def create_thread_in_db(forum_id, creator_id, title, spotify_url, description):
             INSERT INTO threads (
                 forum_id,
                 creator_id,
-                title, 
+                title,
                 spotify_url,
                 description
             )
@@ -128,6 +128,40 @@ def create_thread_in_db(forum_id, creator_id, title, spotify_url, description):
         cur.close()
         conn.close()
 
+def get_all_threads():
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """SELECT
+                threads.id,
+                threads.title,
+                threads.description,
+                threads.spotify_url,
+                threads.created_at,
+                users.username
+            FROM threads
+            JOIN users ON threads.creator_id = users.id
+            ORDER BY threads.created_at DESC
+            """
+        )
+        rows = cur.fetchall()
+        return[
+            {
+                "id": row[0],
+                "title": row[1],
+                "description": row[2],
+                "spotify_url": row[3],
+                "created_at": row[4],
+                "username": row[5],
+            }
+            for row in rows
+        ]
+    except Exception as e:
+        return []
+    finally:
+        cur.close()
+        conn.close()
 
 def get_threads_by_forum(forum_id):
     """Fetches all threads associated with a specific forum based on the forum ID.
@@ -151,13 +185,13 @@ def get_threads_by_forum(forum_id):
             SELECT
                 threads.id,
                 threads.forum_id,
-                threads.creator_id, 
+                threads.creator_id,
                 threads.title,
-                threads.spotify_url, 
-                threads.description, 
+                threads.spotify_url,
+                threads.description,
                 threads.is_pinned,
-                threads.created_at, 
-                threads.updated_at, 
+                threads.created_at,
+                threads.updated_at,
                 users.username
             FROM threads
             JOIN users ON threads.creator_id = users.id

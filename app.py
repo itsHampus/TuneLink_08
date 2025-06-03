@@ -15,7 +15,7 @@ from flask import (
 from spotipy import Spotify
 
 import db
-from auth import handle_callback, spotify_auth
+from auth import handle_callback, spotify_auth, get_app_spotify_client
 from spotify import get_album_image_url, get_dashboard_data, get_user, get_user_profile
 
 load_dotenv()
@@ -55,8 +55,47 @@ def user_injection():
 
 @app.route("/")
 def index():
-    auth_url = spotify_auth(session)
-    return render_template("index.html", auth_url=auth_url)
+    token_info = session.get("token_info")
+    user_id = session.get("user_id")
+    show_all = request.args.get("show_all", "false").lower() == "true"
+    user = None
+    auth_url = None
+
+    sp = None
+    threads = []
+
+    if token_info is not None and user_id is not None:
+        user, threads = get_dashboard_data(token_info, user_id)
+        if show_all:
+            threads = db.get_all_threads()
+            sp = Spotify(auth=token_info["access_token"])
+            for thread in threads:
+                spotify_url = thread.get("spotify_url")
+                if spotify_url is not None:
+                    thread["album_image"] = get_album_image_url(spotify_url, sp)
+            else:
+                thread["album_image"] = "/static/tunelink.png"
+        else:
+            user , threads = get_dashboard_data(token_info, user_id)
+    else:
+        threads = db.get_all_threads()
+        sp = get_app_spotify_client()
+        auth_url = spotify_auth(session)
+
+        for thread in threads:
+            spotify_url = thread.get("spotify_url")
+            if spotify_url is not None:
+                thread["album_image"] = get_album_image_url(spotify_url, sp)
+            else:
+                thread["album_image"] = "/static/tunelink.png"
+
+
+    return render_template("dashboard.html",
+                            threads = threads,
+                            show_all = show_all,
+                            user = user,
+                            auth_url = auth_url if user is None else None
+    )
 
 
 @app.route("/callback")
@@ -65,16 +104,16 @@ def callback():
     return redirect(url_for("profile"))
 
 
-@app.route("/dashboard")
-def dashboard():
-    user_id = session.get("user_id")
-    token_info = session.get("token_info")
-    if token_info is None or user_id is None:
-        return redirect(url_for("index"))
+# @app.route("/dashboard")
+# def dashboard():
+#     user_id = session.get("user_id")
+#     token_info = session.get("token_info")
+#     if token_info is None or user_id is None:
+#         return redirect(url_for("index"))
 
-    user, threads = get_dashboard_data(token_info, user_id)
+#     user, threads = get_dashboard_data(token_info, user_id)
 
-    return render_template("dashboard.html", threads=threads, user=user)
+#     return render_template("dashboard.html", threads=threads, user=user)
 
 
 @app.route("/profile")
@@ -247,7 +286,13 @@ def error():
 
 @app.errorhandler(404)
 def page_not_found(err):
-    user = get_user(session["token_info"]["access_token"])
+    user = None
+    if "token_info" in session:
+        try:
+            user = get_user(session["token_info"]["access_token"])
+        except Exception as e:
+            print(f"Fel vid hämtning av användarinfo: {e}")
+
 
     return (
         render_template(
