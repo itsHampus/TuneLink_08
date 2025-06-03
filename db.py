@@ -610,9 +610,11 @@ def get_thread_by_id(thread_id):
                 threads.description,
                 threads.spotify_url,
                 threads.created_at,
-                users.username
+                users.username,
+                forums.name as subforum_name
             FROM threads
             JOIN users ON threads.creator_id = users.id
+            JOIN forums ON threads.forum_id = forums.id
             WHERE threads.id = %s
             """,
             (thread_id,),
@@ -626,11 +628,96 @@ def get_thread_by_id(thread_id):
                 "spotify_url": row[3],
                 "created_at": row[4],
                 "username": row[5],
+                "subforum_name": row[6],
             }
         return None
     except Exception as e:
         print(f"Error fetching thread by id: {e}")
         return None
+    finally:
+        cur.close()
+        conn.close()
+
+
+def register_thread_like_or_dislike(user_id, thread_id, vote):
+    """Registers, updates or removes a like or dislike for a thread by a user.
+
+    If the user clicks the same vote (like or dislike) twice, the vote is removed.
+    If the user changes their vote, the new vote is registered.
+
+    Args
+    -----
+        user_id : int
+            The ID of the user.
+        thread_id : int
+            The ID of the thread.
+        vote : int
+            The vote value, 1 for like and -1 for dislike.
+
+    Returns
+    -----
+        None
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+
+        cur.execute(
+            "DELETE FROM likes WHERE user_id = %s AND thread_id = %s AND vote = %s",
+            (user_id, thread_id, vote),
+        )
+        if cur.rowcount == 0:
+            cur.execute(
+                """
+                INSERT INTO likes (user_id, thread_id, vote)
+                VALUES (%s, %s, %s)
+                ON CONFLICT (user_id, thread_id)
+                DO UPDATE SET vote = EXCLUDED.vote
+                """,
+                (user_id, thread_id, vote),
+            )
+        conn.commit()
+    except Exception as e:
+        print(f"Error registering thread like/dislike: {e}")
+    finally:
+        cur.close()
+        conn.close()
+
+
+def get_thread_likes_and_dislikes(thread_id):
+    """Retrieves the total number of likes and dislikes for a specific thread.
+
+    Args
+    -----
+        thread_id : int
+            The ID of the thread.
+
+    Returns
+    -----
+        dict
+            A dictionary containing the total likes and dislikes for the thread.
+            Example: {"likes": 10, "dislikes": 2}
+
+        If an error occurs, returns {"likes": 0, "dislikes": 0}.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """
+            SELECT
+                SUM(CASE WHEN vote = 1 THEN 1 ELSE 0 END) AS likes,
+                SUM(CASE WHEN vote = -1 THEN 1 ELSE 0 END) AS dislikes
+            FROM likes
+            WHERE thread_id = %s
+            """,
+            (thread_id,),
+        )
+        row = cur.fetchone()
+        return {"likes": row[0] or 0, "dislikes": row[1] or 0}
+    except Exception as e:
+        print(f"Error fetching thread likes and dislikes: {e}")
+        return {"likes": 0, "dislikes": 0}
     finally:
         cur.close()
         conn.close()
