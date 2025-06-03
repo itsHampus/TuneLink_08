@@ -1,25 +1,44 @@
-{% extends 'base.html' %} {% block content %}
-<h2 class="text-center">{{ thread.title }}</h2>
-    <p class="text-muted">{{ thread.username }} - {{ thread.created_at.strftime("%Y-%m-%d") }}</p>
+{% extends 'base.html' %}
 
-    <div class="text-center my-3">
-        <img src="{{ thread.image_url }}" alt="Album cover">
-    </div>
+{% block content %}
+<div class="container my-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10 col-sm-12">
 
-    <p class="text-center">{{ thread.description }}</p>
-    <a href="{{ thread.spotify_url }}" target="blank" class="btn btn-success mb-3">
-    <i class="fab fa-spotify me-1"></i>Spela i Spotify
-    </a>
-<hr>
-<h5>Kommentarer</h5>
-{% for comment in comments %}
-    <div class="mb-3 p-2 border rounded">
+      <h2 class="text-center">{{ thread.title }}</h2>
+      <p class="text-muted text-center">{{ thread.username }} - {{ thread.created_at.strftime("%Y-%m-%d") }}</p>
+
+      {% if thread.image_url %}
+      <div class="text-center my-3">
+        <img src="{{ thread.image_url }}" alt="Album cover" class="img-fluid rounded shadow">
+      </div>
+      {% endif %}
+
+      <p class="text-center">{{ thread.description }}</p>
+
+      {% if thread.spotify_url %}
+      <div class="text-center mb-4">
+        <a href="{{ thread.spotify_url }}" target="_blank" class="btn btn-success">
+          <i class="fab fa-spotify me-1"></i>Spela i Spotify
+        </a>
+      </div>
+      {% endif %}
+
+      <hr>
+
+      <h5>Kommentarer</h5>
+
+      {% for comment in comments %}
+      <div class="mb-3 p-3 border rounded bg-light">
         <p class="mb-1"><strong>{{ comment.username }}</strong></p>
-        <p>{{ comment.description }}</p>
+        <p class="mb-2">{{ comment.description }}</p>
         <small class="text-muted">{{ comment.created_at.strftime("%Y-%m-%d") }}</small>
-    </div>
-{% else %}
-<p class="text-muted">Inga kommentarer än.</p>
-{% endfor %}
+      </div>
+      {% else %}
+      <p class="text-muted">Inga kommentarer än.</p>
+      {% endfor %}
 
+    </div>
+  </div>
+</div>
 {% endblock %}
