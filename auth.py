@@ -68,6 +68,15 @@ def handle_callback(session):
     return None
 
 def get_app_spotify_client():
+    """Initializes and returns a Spotify client for the application.
+    Enivronment variables:
+        SPOTIPY_CLIENT_ID: Spotify client ID.
+        SPOTIPY_CLIENT_SECRET: Spotify client secret.
+
+        Returns
+        -------
+            spotipy.Spotify: an authenticated Spotify client.
+            """
     auth_manager = SpotifyClientCredentials(
         client_id=os.getenv("SPOTIPY_CLIENT_ID"),
         client_secret=os.getenv("SPOTIPY_CLIENT_SECRET"),

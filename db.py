@@ -129,6 +129,17 @@ def create_thread_in_db(forum_id, creator_id, title, spotify_url, description):
         conn.close()
 
 def get_all_threads():
+    """Retrives the 15 most recent threads from the database.
+
+    The threads are ordered by their creation date in descending order.
+
+    Returns
+    -------
+        list of dict
+            A list of dictionaries, each containing the thread's ID, title, description,
+            Spotify URL, creation date, and the username of the creator.
+        Returns an empty list if no threads are found or an error occurs.
+    """
     conn = get_connection()
     cur = conn.cursor()
     try:
