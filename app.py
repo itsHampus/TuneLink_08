@@ -24,6 +24,7 @@ app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET")
 
 
+
 @app.context_processor
 def user_injection():
     """Injects the user into the template context."""
@@ -261,6 +262,16 @@ def show_thread(thread_id):
     thread["image_url"] = get_album_image_url(thread["spotify_url"], sp)
 
     comments = db.get_comments_for_thread(thread_id)
+
+
+    # 💡 Lägg till image_url för varje kommentar om de har en Spotify-länk
+    for comment in comments:
+        spotify_url = comment.get("spotify_url")
+        if spotify_url:
+            comment["image_url"] = get_album_image_url(spotify_url, sp)
+        else:
+            comment["image_url"] = "/static/tunelink.png"
+
     likes_and_dislikes = db.get_thread_likes_and_dislikes(thread_id)
     return render_template(
         "thread.html",
@@ -325,21 +336,25 @@ def delete_subforum(name):
     return redirect(url_for("profile"))
 
 
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect(url_for("index"))
+@app.route("/thread/<int:thread_id>/comment", methods=["POST"])
+def comment_on_thread(thread_id):
+   user_id = session.get("user_id")
+   if not user_id:
+       return redirect(url_for("index"))
 
 
-@app.route("/ajax/search_subforums")
-def ajax_search_subforums():
-    query = request.args.get("q", "").strip()
-    if query is None:
-        return jsonify([])
+   description = request.form.get("description")
+   spotify_url = request.form.get("spotify_url")
 
-    results = db.search_subforums_by_name(query)
-    return jsonify(results)
 
+   if not description:
+       flash("Du måste skriva något.")
+       return redirect(url_for("show_thread", thread_id=thread_id))
+   
+   comments = db.add_comment_to_thread(thread_id, user_id, description, spotify_url)
+   flash("Kommentar tillagd.")
+   return redirect(url_for("show_thread", comments=comments, thread_id=thread_id))
+   
 
 if __name__ == "__main__":
     app.run(debug=True)

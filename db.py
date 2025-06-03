@@ -727,20 +727,6 @@ def get_thread_likes_and_dislikes(thread_id):
 
 
 def get_comments_for_thread(thread_id):
-    """
-    Fetches all comments for specific thread
-
-    Args
-    -------
-        Thread_id : int
-            The id of the thread were the comments are going to be retrived.
-
-    Returns
-    -------
-        Dict
-            A dict containing the comments description, created_at and username
-
-    """
     conn = get_connection()
     cur = conn.cursor()
     try:
@@ -749,13 +735,14 @@ def get_comments_for_thread(thread_id):
             SELECT
                 t_comments.description,
                 t_comments.created_at,
-                users.username
+                users.username,
+                t_comments.spotify_url
             FROM t_comments
             JOIN users ON t_comments.user_id = users.id
             WHERE t_comments.thread_id = %s
-            ORDER BY t_comments.created_at DESC
+            ORDER BY t_comments.created_at ASC
             """,
-            (thread_id,),
+            (thread_id,)
         )
         rows = cur.fetchall()
         return [
@@ -763,6 +750,7 @@ def get_comments_for_thread(thread_id):
                 "description": row[0],
                 "created_at": row[1],
                 "username": row[2],
+                "spotify_url": row[3]
             }
             for row in rows
         ]
@@ -829,6 +817,18 @@ def get_user_role(user_id):
     return result[0] if result else None
 
 
+def add_comment_to_thread(thread_id, user_id, description, spotify_url=None):
+   conn = get_connection()
+   cur = conn.cursor()
+   cur.execute("""
+       INSERT INTO t_comments (thread_id, user_id, description, spotify_url)
+       VALUES (%s, %s, %s, %s)
+   """, (thread_id, user_id, description, spotify_url))
+   conn.commit()
+   cur.close()
+   conn.close()
+
+
 def get_threads_by_user_subscriptions(user_id):
     """Retrives all threads the user is subscribed to.
 
@@ -850,7 +850,6 @@ def get_threads_by_user_subscriptions(user_id):
 
         Returns an empty list if no threads are found or an error occurs.
     """
-
     conn = get_connection()
     cur = conn.cursor()
     try:
