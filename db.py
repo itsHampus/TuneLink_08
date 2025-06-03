@@ -128,6 +128,7 @@ def create_thread_in_db(forum_id, creator_id, title, spotify_url, description):
         cur.close()
         conn.close()
 
+
 def get_all_threads():
     """Retrives the 15 most recent threads from the database.
 
@@ -144,7 +145,8 @@ def get_all_threads():
     cur = conn.cursor()
     try:
         cur.execute(
-            """SELECT
+            """
+            SELECT
                 threads.id,
                 threads.title,
                 threads.description,
@@ -158,7 +160,7 @@ def get_all_threads():
             """
         )
         rows = cur.fetchall()
-        return[
+        return [
             {
                 "id": row[0],
                 "title": row[1],
@@ -174,6 +176,7 @@ def get_all_threads():
     finally:
         cur.close()
         conn.close()
+
 
 def get_threads_by_forum(forum_id):
     """Fetches all threads associated with a specific forum based on the forum ID.

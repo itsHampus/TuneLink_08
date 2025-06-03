@@ -15,7 +15,7 @@ from flask import (
 from spotipy import Spotify
 
 import db
-from auth import handle_callback, spotify_auth, get_app_spotify_client
+from auth import get_app_spotify_client, handle_callback, spotify_auth
 from spotify import get_album_image_url, get_dashboard_data, get_user, get_user_profile
 
 load_dotenv()
@@ -73,10 +73,10 @@ def index():
                 spotify_url = thread.get("spotify_url")
                 if spotify_url is not None:
                     thread["album_image"] = get_album_image_url(spotify_url, sp)
-            else:
-                thread["album_image"] = "/static/tunelink.png"
+                else:
+                    thread["album_image"] = "/static/tunelink.png"
         else:
-            user , threads = get_dashboard_data(token_info, user_id)
+            user, threads = get_dashboard_data(token_info, user_id)
     else:
         threads = db.get_all_threads()
         sp = get_app_spotify_client()
@@ -89,31 +89,19 @@ def index():
             else:
                 thread["album_image"] = "/static/tunelink.png"
 
-
-    return render_template("dashboard.html",
-                            threads = threads,
-                            show_all = show_all,
-                            user = user,
-                            auth_url = auth_url if user is None else None
+    return render_template(
+        "dashboard.html",
+        threads=threads,
+        show_all=show_all,
+        user=user,
+        auth_url=auth_url if user is None else None,
     )
 
 
 @app.route("/callback")
 def callback():
     handle_callback(session)
-    return redirect(url_for("profile"))
-
-
-# @app.route("/dashboard")
-# def dashboard():
-#     user_id = session.get("user_id")
-#     token_info = session.get("token_info")
-#     if token_info is None or user_id is None:
-#         return redirect(url_for("index"))
-
-#     user, threads = get_dashboard_data(token_info, user_id)
-
-#     return render_template("dashboard.html", threads=threads, user=user)
+    return redirect(url_for("index"))
 
 
 @app.route("/profile")
@@ -314,7 +302,6 @@ def page_not_found(err):
             user = get_user(session["token_info"]["access_token"])
         except Exception as e:
             print(f"Fel vid hämtning av användarinfo: {e}")
-
 
     return (
         render_template(
