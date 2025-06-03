@@ -338,23 +338,27 @@ def delete_subforum(name):
 
 @app.route("/thread/<int:thread_id>/comment", methods=["POST"])
 def comment_on_thread(thread_id):
-   user_id = session.get("user_id")
-   if not user_id:
-       return redirect(url_for("index"))
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for("index"))
 
 
-   description = request.form.get("description")
-   spotify_url = request.form.get("spotify_url")
+    description = request.form.get("description")
+    spotify_url = request.form.get("spotify_url")
 
 
-   if not description:
-       flash("Du måste skriva något.")
-       return redirect(url_for("show_thread", thread_id=thread_id))
-   
-   comments = db.add_comment_to_thread(thread_id, user_id, description, spotify_url)
-   flash("Kommentar tillagd.")
-   return redirect(url_for("show_thread", comments=comments, thread_id=thread_id))
-   
+    if not description:
+        flash("Du måste skriva något.")
+        return redirect(url_for("show_thread", thread_id=thread_id))
+
+    comments = db.add_comment_to_thread(thread_id, user_id, description, spotify_url)
+    flash("Kommentar tillagd.")
+    return redirect(url_for("show_thread", comments=comments, thread_id=thread_id))
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
 
 if __name__ == "__main__":
     app.run(debug=True)
