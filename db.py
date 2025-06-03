@@ -111,7 +111,7 @@ def create_thread_in_db(forum_id, creator_id, title, spotify_url, description):
             INSERT INTO threads (
                 forum_id,
                 creator_id,
-                title, 
+                title,
                 spotify_url,
                 description
             )
@@ -124,6 +124,55 @@ def create_thread_in_db(forum_id, creator_id, title, spotify_url, description):
         conn.close()
     except Exception as e:
         print("Error trying to create thread in db at create_thread_db: " + str(e))
+    finally:
+        cur.close()
+        conn.close()
+
+
+def get_all_threads():
+    """Retrives the 15 most recent threads from the database.
+
+    The threads are ordered by their creation date in descending order.
+
+    Returns
+    -------
+        list of dict
+            A list of dictionaries, each containing the thread's ID, title, description,
+            Spotify URL, creation date, and the username of the creator.
+        Returns an empty list if no threads are found or an error occurs.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """
+            SELECT
+                threads.id,
+                threads.title,
+                threads.description,
+                threads.spotify_url,
+                threads.created_at,
+                users.username
+            FROM threads
+            JOIN users ON threads.creator_id = users.id
+            ORDER BY threads.created_at DESC
+            LIMIT 15
+            """
+        )
+        rows = cur.fetchall()
+        return [
+            {
+                "id": row[0],
+                "title": row[1],
+                "description": row[2],
+                "spotify_url": row[3],
+                "created_at": row[4],
+                "username": row[5],
+            }
+            for row in rows
+        ]
+    except Exception as e:
+        return []
     finally:
         cur.close()
         conn.close()
@@ -151,13 +200,13 @@ def get_threads_by_forum(forum_id):
             SELECT
                 threads.id,
                 threads.forum_id,
-                threads.creator_id, 
+                threads.creator_id,
                 threads.title,
-                threads.spotify_url, 
-                threads.description, 
+                threads.spotify_url,
+                threads.description,
                 threads.is_pinned,
-                threads.created_at, 
-                threads.updated_at, 
+                threads.created_at,
+                threads.updated_at,
                 users.username
             FROM threads
             JOIN users ON threads.creator_id = users.id
