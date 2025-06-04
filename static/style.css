@@ -29,14 +29,25 @@
     right: 0;
   }
 
-  .search-wrapper {
+  /* .search-wrapper {
     position: absolute;
     top: 50%;
     left: 22%;
     transform: translate(-50%, -50%);
     width: 500px;
     max-width: 90%;
-  }
+  } */
+
+  .search-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  width: 30%;
+  max-width: 100%;
+  margin-top: 1px;
+  gap: 0.5rem;
+}
 
 
   .search-input {
@@ -266,7 +277,7 @@
     width: 30%;
     margin: 5rem auto;
     position: relative;
-    margin-left: 55vh;
+    /* margin-left: 55vh; */
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 
 }
@@ -284,4 +295,107 @@
   fill: currentColor;
   vertical-align: middle;
   transition: fill 0.2s ease;
+}
+
+@media screen and (max-width: 768px) {
+  /* Threadkort och profilkort */
+  .thread_card,
+  .profil_card {
+    width: 90%;
+    margin: 2rem auto;
+  }
+
+  .thread_image {
+    height: auto;
+  }
+
+  .profilepicture {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+    display: block;
+  }
+
+  .genre-tags {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Huvudinnehåll */
+  .main-content {
+    margin-left: 0;
+    padding: 1rem;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    display: none;
+  }
+
+  /* Navbar */
+  .custom-navbar {
+    position: relative;
+  }
+
+  /* Spotify-knappar */
+  .btn.btn-success {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.6rem;
+    white-space: nowrap;
+  }
+
+  .btn i {
+    margin-right: 4px;
+  }
+
+  .d-flex.gap-2 {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Hamburgerknapp */
+  .hamburger-btn {
+    display: block;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    background-color: #1a1c2e;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 20px;
+    border-radius: 8px;
+    z-index: 1100;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: -100%;
+    top: 60px;
+    width: 100%;
+    height: calc(100vh - 60px);
+    transition: left 0.3s ease;
+    z-index: 1090;
+  }
+
+  .sidebar.active {
+    left: 0;
+  }
+
+  /* Sökfält */
+  .search-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-input,
+  .search-btn {
+    width: 100%;
+    border-radius: 12px;
+    margin-bottom: 0.5rem;
+  }
+
+  .search-btn {
+    border-left: 2px solid #e2e8f0;
+  }
 }
