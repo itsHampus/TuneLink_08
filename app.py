@@ -24,7 +24,6 @@ app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET")
 
 
-
 @app.context_processor
 def user_injection():
     """Injects the user into the template context."""
@@ -263,7 +262,6 @@ def show_thread(thread_id):
 
     comments = db.get_comments_for_thread(thread_id)
 
-
     # 💡 Lägg till image_url för varje kommentar om de har en Spotify-länk
     for comment in comments:
         spotify_url = comment.get("spotify_url")
@@ -342,23 +340,23 @@ def comment_on_thread(thread_id):
     if not user_id:
         return redirect(url_for("index"))
 
-
     description = request.form.get("description")
     spotify_url = request.form.get("spotify_url")
 
-
     if not description:
-        flash("Du måste skriva något.")
+        flash("Du måste skriva något.", "danger")
         return redirect(url_for("show_thread", thread_id=thread_id))
 
     comments = db.add_comment_to_thread(thread_id, user_id, description, spotify_url)
-    flash("Kommentar tillagd.")
+    flash("Kommentar tillagd.", "success")
     return redirect(url_for("show_thread", comments=comments, thread_id=thread_id))
 
-@app.route('/logout')
+
+@app.route("/logout")
 def logout():
     session.clear()
-    return redirect(url_for('index'))
+    return redirect(url_for("index"))
+
 
 if __name__ == "__main__":
     app.run(debug=True)
