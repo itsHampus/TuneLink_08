@@ -27,13 +27,37 @@
             <i class="bi bi-hand-thumbs-down"></i>
             <span id="dislike-count">{{ dislikes }}</span>
         </button>
-  <a href="{{ thread.spotify_url }}" target="_blank" class="btn btn-success">
-    <i class="fab fa-spotify me-1"></i>Spela i Spotify
-  </a>
+        <a href="{{ thread.spotify_url }}" target="_blank" class="btn btn-success">
+            <i class="fab fa-spotify me-1"></i>Spela i Spotify
+        </a>
 
-  <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#comment_modal">
-    <i class="bi bi-chat-dots-fill pe-2"></i>Kommentera tråd
-  </button>
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#comment_modal">
+            <i class="bi bi-chat-dots-fill pe-2"></i>Kommentera tråd
+        </button>
+
+        <!-- F-Inl-3 and F-Inl-3.1 Remove thread -->
+        {%if user_id == thread.creator_id%}
+        <button type="button" class="btn btn-danger" id="remove-thread-button" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">Ta bort inlägg</button>
+        
+        <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmDeleteModalLabel">Bekräfta borttagning</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Stäng"></button>
+                    </div>
+                    <div class="modal-body">
+                        Är du säker på att du vill ta bort denna tråd? Detta går inte att ångra.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Avbryt</button>
+                        <button type="button" class="btn btn-danger" id="confirm-delete-btn">Ta bort</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {%endif%}
+    </div>
 </div>
 
 <hr>
