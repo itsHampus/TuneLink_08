@@ -12,7 +12,12 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   </head>
   <body>
+    <!-- Top Navbar -->
     <nav class="navbar custom-navbar fixed-top d-flex align-items-center justify-content-between px-4">
+      <!-- Hamburger for mobile -->
+      <button class="navbar-toggler d-block d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
       <h4 class="logo-text fw-bold mb-0">
         <a href="{{ url_for('profile')}}" class="text-white text-decoration-none">TuneLink</a>
       </h4>
@@ -39,15 +44,61 @@
           <div class="ms-3 profile-info">
             <h6 class="text-white mb-0">
               <a href="{{ url_for('profile')}}" class="text-white text-decoration-none">{{ user.display_name }}</a>
-              <a href="{{ url_for('logout') }}" class="btn btn-danger  btn-sm">Logga ut</a></h6>
+              <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm">Logga ut</a>
+            </h6>
           </div>
         </div>
-      </div>
       {% endif %}
     </nav>
 
+    <!-- Offcanvas Sidebar for Mobile -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="sidebarOffcanvasLabel">Meny</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Stäng"></button>
+      </div>
+      <div class="offcanvas-body p-0">
+        <nav class="sidebar d-flex flex-column flex-shrink-0">
+          <div class="nav flex-column">
+            {% if session.get("user_id") %}
+            <div class="d-flex flex-wrap">
+              <a href="{{ url_for('profile') }}" class="sidebar-link text-decoration-none p-3 active">
+                <i class="bi bi-house-door me-2"></i>
+                <span class="hide-on-collapse">Home</span>
+              </a>
+              <a href="{{ url_for('index') }}" class="sidebar-link text-decoration-none p-3">
+                <i class="bi bi-speedometer2 me-2"></i>
+                <span class="hide-on-collapse">Dashboard</span>
+              </a>
+            </div>
+            <a href="#" class="sidebar-link active text-decoration-none p-3" data-bs-toggle="modal" data-bs-target="#start_subforum_modal">
+              <i class="fas fa-music me-3"></i>
+              <span class="hide-on-collapse">Skapa ett nytt Subforum</span>
+            </a>
+            {% else %}
+            <div class="sidebar-link text p-2">
+              <span class="hide-on-collapse">[Konto krävs] Profil</span>
+            </div>
+            <div class="sidebar-link text p-2">
+              <span class="hide-on-collapse">[Konto krävs] Skapa subforum</span>
+            </div>
+            {% endif %}
+            {% for forum in subscribed_forums %}
+            <a href="{{ url_for('show_subforum', name=forum['name']) }}" class="sidebar-link text-decoration-none p-3 {% if forum['name'] == name %}active{% endif %}">
+              <i class="fas fa-music me-3"></i>
+              <span class="hide-on-collapse">{{ forum['name'] }}</span>
+            </a>
+            {% else %}
+            <div class="text px-3 py-2 small">Inga prenumerationer!</div>
+            {% endfor %}
+          </div>
+        </nav>
+      </div>
+    </div>
+
     <div class="d-flex">
-      <nav class="sidebar d-flex flex-column flex-shrink-0 position-fixed">
+      <!-- Sidebar for Desktop -->
+      <nav class="sidebar d-none d-md-flex flex-column flex-shrink-0 position-fixed">
         <div class="nav flex-column">
           {% if session.get("user_id") %}
           <div class="d-flex flex-wrap">
@@ -60,9 +111,7 @@
               <span class="hide-on-collapse">Dashboard</span>
             </a>
           </div>
-
           <a href="#" class="sidebar-link active text-decoration-none p-3" data-bs-toggle="modal" data-bs-target="#start_subforum_modal">
-
             <i class="fas fa-music me-3"></i>
             <span class="hide-on-collapse">Skapa ett nytt Subforum</span>
           </a>
@@ -73,10 +122,9 @@
           <div class="sidebar-link text p-2">
             <span class="hide-on-collapse">[Konto krävs] Skapa subforum</span>
           </div>
-        {% endif %}
-          {% for forum in subscribed_forums%}
-          <a href="{{ url_for('show_subforum', name=forum['name']) }}" class="sidebar-link text-decoration-none p-3"
-            class="sidebar-link text-decoration-none p-3 {% if forum ['name'] == name %}active{% endif %}">
+          {% endif %}
+          {% for forum in subscribed_forums %}
+          <a href="{{ url_for('show_subforum', name=forum['name']) }}" class="sidebar-link text-decoration-none p-3 {% if forum['name'] == name %}active{% endif %}">
             <i class="fas fa-music me-3"></i>
             <span class="hide-on-collapse">{{ forum['name'] }}</span>
           </a>
@@ -84,97 +132,93 @@
           <div class="text px-3 py-2 small">Inga prenumerationer!</div>
           {% endfor %}
         </div>
-
-
       </nav>
       <main class="main-content flex-grow-1 p-4">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-    <div class="container mt-4">
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Stäng"></button>
-        </div>
-      {% endfor %}
-    </div>
-  {% endif %}
-{% endwith %}
+          <div class="container mt-4">
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Stäng"></button>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+        {% endwith %}
         {% block content %}{% endblock %}
       </main>
     </div>
 
-<div class="modal fade" id="start_subforum_modal" tabindex="-1" aria-labelledby="start_subforum_label" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
+    <!-- Modal: Skapa Subforum -->
+    <div class="modal fade" id="start_subforum_modal" tabindex="-1" aria-labelledby="start_subforum_label" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
 
-      <div class="modal-header">
-        <h5 class="modal-title" id="start_subforum_label">Starta ett nytt Subforum</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Stäng"></button>
+          <div class="modal-header">
+            <h5 class="modal-title" id="start_subforum_label">Starta ett nytt Subforum</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Stäng"></button>
+          </div>
+
+          <div class="modal-body">
+            <div class="card mb-4">
+              <div class="card-body">
+                <form method="POST" action="{{ url_for('create_subforum') }}">
+                  <div class="mb-3">
+                    <label for="thread_title" class="form-label">Titel</label>
+                    <input type="text" class="form-control" id="thread_title" name="name" placeholder="Ange en titel...">
+                  </div>
+                  <div class="mb-3">
+                    <label for="subforum_description" class="form-label">Beskrivning</label>
+                    <textarea class="form-control" id="subforum_description" rows="3" name="subforum_description" placeholder="Beskrivning..."></textarea>
+                  </div>
+                  <div class="d-flex justify-content-end gap-2">
+                    <button type="submit" class="btn btn-primary">Skapa Subforum</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Avbryt</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
+    </div>
 
-      <div class="modal-body">
-        <div class="card mb-4">
-          <div class="card-body">
-            <form method="POST" action="{{ url_for('create_subforum') }}">
+    {% if thread %}
+    <!-- Modal: Kommentera tråd -->
+    <div class="modal fade" id="comment_modal" tabindex="-1" aria-labelledby="comment_modal_label" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+          <div class="modal-header">
+            <h5 class="modal-title" id="comment_modal_label">Lämna en kommentar</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Stäng"></button>
+          </div>
+
+          <div class="modal-body">
+            <form method="POST" action="{{ url_for('comment_on_thread', thread_id=thread.id) }}">
               <div class="mb-3">
-                <label for="thread_title" class="form-label">Titel</label>
-                <input type="text" class="form-control" id="thread_title" name="name" placeholder="Ange en titel...">
+                <label for="comment_text" class="form-label">Kommentar</label>
+                <textarea class="form-control" id="comment_text" name="description" rows="3" placeholder="Skriv din kommentar här..." required></textarea>
               </div>
               <div class="mb-3">
-                <label for="subforum_description" class="form-label">Beskrivning</label>
-                <textarea class="form-control" id="subforum_description" rows="3" name="subforum_description"placeholder="Beskrivning..."></textarea>
+                <label for="spotify_url" class="form-label">Spotify-länk (valfri)</label>
+                <input type="url" class="form-control" id="spotify_url" name="spotify_url" placeholder="https://open.spotify.com/...">
               </div>
               <div class="d-flex justify-content-end gap-2">
-                <button type="submit" class="btn btn-primary">Skapa Subforum</button>
+                <button type="submit" class="btn btn-primary">Skicka kommentar</button>
                 <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Avbryt</button>
               </div>
             </form>
           </div>
+
         </div>
       </div>
-
     </div>
-  </div>
-</div>
-{% if thread %}
-<!-- Modal: Kommentera tråd -->
-<div class="modal fade" id="comment_modal" tabindex="-1" aria-labelledby="comment_modal_label" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
+    {% endif %}
 
-      <div class="modal-header">
-        <h5 class="modal-title" id="comment_modal_label">Lämna en kommentar</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Stäng"></button>
-      </div>
-
-      <div class="modal-body">
-        <form method="POST" action="{{ url_for('comment_on_thread', thread_id=thread.id) }}">
-          <div class="mb-3">
-            <label for="comment_text" class="form-label">Kommentar</label>
-            <textarea class="form-control" id="comment_text" name="description" rows="3" placeholder="Skriv din kommentar här..." required></textarea>
-          </div>
-          <div class="mb-3">
-            <label for="spotify_url" class="form-label">Spotify-länk (valfri)</label>
-            <input type="url" class="form-control" id="spotify_url" name="spotify_url" placeholder="https://open.spotify.com/...">
-          </div>
-          <div class="d-flex justify-content-end gap-2">
-            <button type="submit" class="btn btn-primary">Skicka kommentar</button>
-            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Avbryt</button>
-          </div>
-        </form>
-      </div>
-
-    </div>
-  </div>
-</div>
-{% endif %}
-
-<script src="{{ url_for('static', filename='main.js') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   </body>
-
-
-
 </html>
