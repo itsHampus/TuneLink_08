@@ -1,0 +1,57 @@
+{% extends 'base.html' %}{% block content %}
+{% if user %}
+  <div class="mb-3 mt-2 text-center">
+    {% if show_all %}
+      <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+        <i class="bi bi-star-fill me-2"></i> Visa prenumererade trådar
+      </a>
+    {% else %}
+      <a href="{{ url_for('index', show_all='true') }}" class="btn btn-outline-primary">
+        <i class="bi bi-list-ul me-2"></i> Visa alla trådar
+      </a>
+    {% endif %}
+  </div>
+{% endif %}
+
+
+<div class="text-center my-4">
+  <div class="d-flex justify-content-center align-items-center gap-2">
+    <div class="container">
+      {% for thread in threads %}
+      <div class="center_wrapper">
+        <div class="thread_card card mb-4">
+          <p class="card-text"><small class="text-muted">{{ thread.username }}</small></p>
+          <h5 class="text-center card-title">{{ thread.title }}</h5>
+
+          <a href="{{ thread.spotify_url }}" target="_blank">
+            <img class="thread_image card-img-top" src="{{ thread.album_image }}" alt="Spotify Album Cover" />
+          </a>
+
+          <div class="card-body">
+            <p class="card-text">{{ thread.description }}</p>
+            {% if thread.created_at %}
+            <p class="card-text"><small class="text-muted">{{ thread.created_at.strftime("%Y-%m-%d") }}</small></p>
+            {% else %}
+            <p class="card-text"><small class="text-muted">Datum saknas</small></p>
+            {% endif %}
+            <div class="d-flex gap-2 mb-3">
+              <a href="{{ url_for('show_thread', thread_id=thread.id) }}" class="btn btn-secondary">
+                <i class="bi bi-chat-dots-fill"></i>
+              </a>
+              <button type="button" class="btn btn-secondary">
+                <i class="bi bi-share"></i>
+              </button>
+              {% if thread.spotify_url %}
+              <a href="{{ thread.spotify_url }}" target="_blank" class="btn btn-success">
+                  <i class="fab fa-spotify me-1"></i>Spela i Spotify
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+    {% endblock %}
