@@ -247,14 +247,6 @@
   }
 
 
-  .main-content {
-    margin-left: var(--sidebar-width);
-    margin-top: 30px;
-    background-color: #f8f9fa;
-    min-height: calc(100vh - 60px);
-    padding: 20px;
-    transition: all 0.3s ease;
-  }
 .small-profile{
     height: 30px;
 }
@@ -399,3 +391,4 @@
     border-left: 2px solid #e2e8f0;
   }
 }
+
