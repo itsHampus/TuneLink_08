@@ -614,7 +614,9 @@ def get_thread_by_id(thread_id):
                 threads.spotify_url,
                 threads.created_at,
                 users.username,
-                forums.name as subforum_name
+                forums.name as subforum_name,
+                forums.id as subforum_id,
+                threads.creator_id
             FROM threads
             JOIN users ON threads.creator_id = users.id
             JOIN forums ON threads.forum_id = forums.id
@@ -632,11 +634,29 @@ def get_thread_by_id(thread_id):
                 "created_at": row[4],
                 "username": row[5],
                 "subforum_name": row[6],
+                "subforum_id": row[7],
+                "creator_id": row[8],
             }
         return None
     except Exception as e:
         print(f"Error fetching thread by id: {e}")
         return None
+    finally:
+        cur.close()
+        conn.close()
+
+
+def remove_thread_from_db(thread_id):
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("DELETE FROM likes WHERE thread_id = %s", (thread_id,))
+        cur.execute("DELETE FROM threads WHERE id = %s", (thread_id,))
+        conn.commit()
+        return cur.rowcount > 0
+    except Exception as e:
+        print(f"Error deleting thread: {e}")
+        return False
     finally:
         cur.close()
         conn.close()
@@ -742,7 +762,7 @@ def get_comments_for_thread(thread_id):
             WHERE t_comments.thread_id = %s
             ORDER BY t_comments.created_at ASC
             """,
-            (thread_id,)
+            (thread_id,),
         )
         rows = cur.fetchall()
         return [
@@ -750,7 +770,7 @@ def get_comments_for_thread(thread_id):
                 "description": row[0],
                 "created_at": row[1],
                 "username": row[2],
-                "spotify_url": row[3]
+                "spotify_url": row[3],
             }
             for row in rows
         ]
@@ -818,15 +838,18 @@ def get_user_role(user_id):
 
 
 def add_comment_to_thread(thread_id, user_id, description, spotify_url=None):
-   conn = get_connection()
-   cur = conn.cursor()
-   cur.execute("""
-       INSERT INTO t_comments (thread_id, user_id, description, spotify_url)
-       VALUES (%s, %s, %s, %s)
-   """, (thread_id, user_id, description, spotify_url))
-   conn.commit()
-   cur.close()
-   conn.close()
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        INSERT INTO t_comments (thread_id, user_id, description, spotify_url)
+        VALUES (%s, %s, %s, %s)
+        """,
+        (thread_id, user_id, description, spotify_url),
+    )
+    conn.commit()
+    cur.close()
+    conn.close()
 
 
 def get_threads_by_user_subscriptions(user_id):
