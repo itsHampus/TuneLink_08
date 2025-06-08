@@ -254,7 +254,8 @@ def show_thread(thread_id):
         return redirect(url_for("error", error="Tråden existerar inte."))
 
     token_info = session.get("token_info")
-    if token_info is None:
+    user_id = session.get("user_id")
+    if token_info is None or user_id is None:
         return redirect(url_for("index"))
 
     sp = Spotify(auth=token_info["access_token"])
@@ -271,13 +272,43 @@ def show_thread(thread_id):
             comment["image_url"] = "/static/tunelink.png"
 
     likes_and_dislikes = db.get_thread_likes_and_dislikes(thread_id)
+
     return render_template(
         "thread.html",
         thread=thread,
         comments=comments,
         likes=likes_and_dislikes["likes"],
         dislikes=likes_and_dislikes["dislikes"],
+        user_id=user_id,
     )
+
+
+@app.route("/thread/<int:thread_id>/remove", methods=["POST"])
+def remove_thread(thread_id):
+    user_id = session.get("user_id")
+    if not user_id:
+        flash("Du måste vara inloggad för att ta bort en tråd.", "danger")
+        return jsonify({"error": "Användaren är inte inloggad."}), 401
+
+    thread = db.get_thread_by_id(thread_id)
+
+    if not thread:
+        flash("Tråden du försöker ta bort existerar inte.", "danger")
+        return jsonify({"error": "Tråden existerar inte."}), 404
+
+    if thread["creator_id"] != user_id:
+        flash("Du har inte rättigheter att ta bort denna tråd.", "danger")
+        return (
+            jsonify({"error": "Du har inte rättigheter att ta bort denna tråd."}),
+            403,
+        )
+
+    is_thread_removed = db.remove_thread_from_db(thread_id)
+    if not is_thread_removed:
+        flash("Fel uppstod vid borttagning av tråden.", "danger")
+        return jsonify({"error": "Fel uppstod vid borttagning av tråden."}), 500
+
+    return jsonify({"success": True, "subforum_name": thread["subforum_name"]}), 200
 
 
 @app.route("/thread/<int:thread_id>/vote", methods=["POST"])
