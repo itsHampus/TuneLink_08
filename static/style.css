@@ -19,6 +19,26 @@
     margin-left: 68px;
     margin-top: 10px;
 }
+.sticky-sidebar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.rules-box {
+  position: absolute;
+  top: 100px;
+  right: 20px;
+  width: 300px;
+  z-index: 10;
+}
+.sidebar-link {
+  font-size: 1rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .custom-navbar {
     height: 60px;
     background: linear-gradient(135deg, #1a1c2e 0%, #16181f 100%);

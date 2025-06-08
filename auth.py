@@ -1,8 +1,9 @@
 import os
 
 from flask import request
+from spotipy import Spotify
 from spotipy.cache_handler import FlaskSessionCacheHandler
-from spotipy.oauth2 import SpotifyOAuth
+from spotipy.oauth2 import SpotifyClientCredentials, SpotifyOAuth
 
 from db import controll_user_login
 from spotify import get_user_profile_id_and_display_name
@@ -65,3 +66,20 @@ def handle_callback(session):
     session["user_id"] = controll_user_login(spotify_id, display_name)
 
     return None
+
+
+def get_app_spotify_client():
+    """Initializes and returns a Spotify client for the application.
+    Enivronment variables:
+        SPOTIPY_CLIENT_ID: Spotify client ID.
+        SPOTIPY_CLIENT_SECRET: Spotify client secret.
+
+    Returns
+    -------
+        spotipy.Spotify: an authenticated Spotify client.
+    """
+    auth_manager = SpotifyClientCredentials(
+        client_id=os.getenv("SPOTIPY_CLIENT_ID"),
+        client_secret=os.getenv("SPOTIPY_CLIENT_SECRET"),
+    )
+    return Spotify(auth_manager=auth_manager)

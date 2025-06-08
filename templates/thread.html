@@ -1,0 +1,87 @@
+{% extends 'base.html' %} 
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-center flex-grow-1">{{ thread.title }}</h2>
+        <a href="{{ url_for('show_subforum', name=thread.subforum_name) }}" class="btn btn-outline-primary ms-3">
+            &larr; Tillbaka till subforum
+        </a>
+    </div>
+    
+    <p class="text-muted">{{ thread.username }} - {{ thread.created_at.strftime("%Y-%m-%d") }}</p>
+
+    <div class="text-center my-3">
+
+        <img src="{{ thread.image_url }}" alt="Album cover">
+        <p class="text-center">{{ thread.description }}</p>
+    </div>
+
+    <div class="d-flex gap-2 mb-4">
+              <button type="button" class="btn btn-secondary" id="like-button">
+        <i class="bi bi-hand-thumbs-up"></i>
+        <span id="like-count">{{ likes }}</span>
+        </button>
+
+
+        <button type="button" class="btn btn-secondary" id="dislike-button">
+            <i class="bi bi-hand-thumbs-down"></i>
+            <span id="dislike-count">{{ dislikes }}</span>
+        </button>
+        <a href="{{ thread.spotify_url }}" target="_blank" class="btn btn-success">
+            <i class="fab fa-spotify me-1"></i>Spela i Spotify
+        </a>
+
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#comment_modal">
+            <i class="bi bi-chat-dots-fill pe-2"></i>Kommentera tråd
+        </button>
+
+        <!-- F-Inl-3 and F-Inl-3.1 Remove thread -->
+        {%if user_id == thread.creator_id%}
+        <button type="button" class="btn btn-danger" id="remove-thread-button" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">Ta bort inlägg</button>
+        
+        <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmDeleteModalLabel">Bekräfta borttagning</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Stäng"></button>
+                    </div>
+                    <div class="modal-body">
+                        Är du säker på att du vill ta bort denna tråd? Detta går inte att ångra.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Avbryt</button>
+                        <button type="button" class="btn btn-danger" id="confirm-delete-btn">Ta bort</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {%endif%}
+    </div>
+</div>
+
+<hr>
+<h5>Kommentarer</h5>
+{% for comment in comments %}
+    <div class="mb-3 p-2 border rounded">
+        <p class="mb-1"><strong>{{ comment.username }}</strong></p>
+        <p>{{ comment.description }}</p>
+
+        {% if comment.image_url %}
+    <div class="mb-2">
+        <img src="{{ comment.image_url }}" width="100" alt="Spotify-bild">
+    </div>
+{% endif %}
+        
+        <small class="text-muted">{{ comment.created_at.strftime("%Y-%m-%d") }}</small>
+
+
+        
+        <small class="text-muted">{{ comment.created_at.strftime("%Y-%m-%d") }}</small>
+    </div>
+{% else %}
+<p class="text-muted">Inga kommentarer än.</p>
+{% endfor %}
+</div>
+
+{% endblock %}
