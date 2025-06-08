@@ -579,7 +579,7 @@ def get_subforum_by_name(name):
         row = cur.fetchone()
 
         if row is not None:
-            return {"id": row[0], "name": row[1]}
+            return {"id": row[0], "name": row[1], "description": row[2]}
         return None
     finally:
         cur.close()

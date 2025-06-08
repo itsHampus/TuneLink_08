@@ -171,6 +171,7 @@ def show_subforum(name):
     threads = subforum_data_dict["threads"]
     for thread in threads:
         thread["image_url"] = get_album_image_url(thread["spotify_url"], sp)
+    print("DEBUG forum dict:", subforum_data_dict["subforum"])
 
     return render_template(
         "subforum.html",
@@ -359,6 +360,24 @@ def comment_on_thread(thread_id):
 def logout():
     session.clear()
     return redirect(url_for('index'))
+
+
+
+
+
+
+
+
+
+
+@app.route("/ajax/search_subforums")
+def ajax_search_subforums():
+    query = request.args.get("q", "").strip()
+    if query is None:
+        return jsonify([])
+
+    results = db.search_subforums_by_name(query)
+    return jsonify(results)
 
 if __name__ == "__main__":
     app.run(debug=True)
