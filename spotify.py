@@ -57,7 +57,7 @@ def get_user_top_tracks(sp: Spotify):
             A list of dictionaries containing the top tracks and their artists.
 
     """
-    top_tracks_raw = sp.current_user_top_tracks(limit=5, time_range="short_term")[
+    top_tracks_raw = sp.current_user_top_tracks(limit=5, time_range="medium_term")[
         "items"
     ]
 
@@ -88,7 +88,7 @@ def get_user_top_artists(sp: Spotify):
         top_artists : list
             A list of dictionaries containing the top artists and their genres.
     """
-    top_artists_raw = sp.current_user_top_artists(limit=5, time_range="short_term")[
+    top_artists_raw = sp.current_user_top_artists(limit=5, time_range="medium_term")[
         "items"
     ]
     top_artists = []
@@ -116,7 +116,7 @@ def get_user_top_genres(sp: Spotify):
         top_genres : list
             A list of the top genres of the user.
     """
-    top_artists_raw = sp.current_user_top_artists(limit=5, time_range="short_term")[
+    top_artists_raw = sp.current_user_top_artists(limit=5, time_range="medium_term")[
         "items"
     ]
     genre_list = []
