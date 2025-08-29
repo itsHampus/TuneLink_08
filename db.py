@@ -123,6 +123,7 @@ def create_thread_in_db(forum_id, creator_id, title, spotify_url, description):
         cur.close()
         conn.close()
     except Exception as e:
+        conn.rollback()
         print("Error trying to create thread in db at create_thread_db: " + str(e))
     finally:
         cur.close()
@@ -234,6 +235,7 @@ def get_threads_by_forum(forum_id):
 
         return threads
     except Exception as e:
+        conn.rollback()
         print(f"Error fetching threads in get_threads_by_forum: {e}")
         return []
     finally:
